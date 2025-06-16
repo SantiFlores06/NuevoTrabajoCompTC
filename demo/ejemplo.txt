@@ -1,0 +1,7 @@
+// Este es un programa de ejemplo
+var x = 10;
+var mensaje = "Hola mundo!";
+
+if (x > 5) {
+    print mensaje;
+}
