@@ -47,3 +47,8 @@ Link Repositorio GitHub proyecto viejo: https://github.com/SantiFlores06/Trabajo
 - **Soporte completo para tipo char** con literales de carácter
 - **Reorganización de tokens léxicos** para correcto reconocimiento
 - **Optimización del análisis semántico** y detección de errores
+
+### Cambios recientes
+- Se agregaron ejemplos de prueba cortos y válidos en la carpeta `demo/` (por ejemplo: `ejemplo_asignacion.txt`, `ejemplo_if.txt`, `ejemplo_operaciones.txt`).
+- Ahora la visualización gráfica del árbol sintáctico se muestra en una ventana con barras de desplazamiento (scroll), permitiendo navegar árboles grandes cómodamente.
+- Para ver el árbol sintáctico gráficamente, se utiliza `TreeViewer` de ANTLR dentro de un `JScrollPane` en un `JFrame`.

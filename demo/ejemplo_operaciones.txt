@@ -1,0 +1,5 @@
+float resultado;
+void main() {
+    resultado = 2.5 + 4.5;
+    print(resultado);
+} 

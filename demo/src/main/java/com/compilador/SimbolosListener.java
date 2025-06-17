@@ -45,6 +45,10 @@ public class SimbolosListener extends MiniLenguajeBaseListener {
 
     @Override
     public void enterDeclaracionVariable(MiniLenguajeParser.DeclaracionVariableContext ctx) {
+        if (ctx == null || ctx.ID() == null || ctx.tipo() == null) {
+            advertencias.add("Advertencia: No se pudo analizar una declaración de variable por errores de sintaxis.");
+            return;
+        }
         String nombre = ctx.ID().getText();
         String tipoDeclarado = ctx.tipo().getText();
         
@@ -73,6 +77,10 @@ public class SimbolosListener extends MiniLenguajeBaseListener {
 
     @Override
     public void enterDeclaracionConstante(MiniLenguajeParser.DeclaracionConstanteContext ctx) {
+        if (ctx == null || ctx.ID() == null || ctx.tipo() == null || ctx.expresion() == null) {
+            advertencias.add("Advertencia: No se pudo analizar una declaración de constante por errores de sintaxis.");
+            return;
+        }
         String nombre = ctx.ID().getText();
         String tipoDeclarado = ctx.tipo().getText();
         String tipoInferido = inferirTipo(ctx.expresion());
@@ -146,6 +154,10 @@ public class SimbolosListener extends MiniLenguajeBaseListener {
 
     @Override
     public void enterSentenciaAsignacion(MiniLenguajeParser.SentenciaAsignacionContext ctx) {
+        if (ctx == null || ctx.ID() == null || ctx.expresion() == null) {
+            advertencias.add("Advertencia: No se pudo analizar una asignación por errores de sintaxis.");
+            return;
+        }
         String nombre = ctx.ID().getText();
         
         if (!scopeActual.existe(nombre)) {
@@ -217,6 +229,10 @@ public class SimbolosListener extends MiniLenguajeBaseListener {
 
     @Override
     public void enterSentenciaIf(MiniLenguajeParser.SentenciaIfContext ctx) {
+        if (ctx == null || ctx.expresion() == null) {
+            advertencias.add("Advertencia: No se pudo analizar una condición de if por errores de sintaxis.");
+            return;
+        }
         if (!enFuncion) {
             erroresCriticos.add("Error critico: Estructura de control 'if' fuera de funcion en linea " + ctx.getStart().getLine());
         }
@@ -230,6 +246,10 @@ public class SimbolosListener extends MiniLenguajeBaseListener {
 
     @Override
     public void enterSentenciaWhile(MiniLenguajeParser.SentenciaWhileContext ctx) {
+        if (ctx == null || ctx.expresion() == null) {
+            advertencias.add("Advertencia: No se pudo analizar una condición de while por errores de sintaxis.");
+            return;
+        }
         if (!enFuncion) {
             erroresCriticos.add("Error critico: Estructura de control 'while' fuera de funcion en linea " + ctx.getStart().getLine());
         }
@@ -250,6 +270,10 @@ public class SimbolosListener extends MiniLenguajeBaseListener {
 
     @Override
     public void enterSentenciaFor(MiniLenguajeParser.SentenciaForContext ctx) {
+        if (ctx == null || ctx.expresion(0) == null) {
+            advertencias.add("Advertencia: No se pudo analizar una condición de for por errores de sintaxis.");
+            return;
+        }
         if (!enFuncion) {
             erroresCriticos.add("Error critico: Estructura de control 'for' fuera de funcion en linea " + ctx.getStart().getLine());
         }
@@ -295,6 +319,10 @@ public class SimbolosListener extends MiniLenguajeBaseListener {
 
     @Override
     public void enterSentenciaPrint(MiniLenguajeParser.SentenciaPrintContext ctx) {
+        if (ctx == null || ctx.expresion() == null) {
+            advertencias.add("Advertencia: No se pudo analizar una expresión en print por errores de sintaxis.");
+            return;
+        }
         verificarVariablesEnExpresion(ctx.expresion());
         System.out.println("Print: " + ctx.expresion().getText());
     }
@@ -348,10 +376,12 @@ public class SimbolosListener extends MiniLenguajeBaseListener {
     }
 
     private String inferirTipo(MiniLenguajeParser.ExpresionContext ctx) {
+        if (ctx == null) return "desconocido";
         return inferirTipoRecursivo(ctx);
     }
     
     private String inferirTipoRecursivo(ParseTree node) {
+        if (node == null) return "desconocido";
         if (node instanceof MiniLenguajeParser.FactorContext) {
             MiniLenguajeParser.FactorContext factor = (MiniLenguajeParser.FactorContext) node;
             
