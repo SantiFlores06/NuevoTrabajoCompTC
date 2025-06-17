@@ -6,14 +6,14 @@ programa : declaracion* EOF ;
 declaracion : declaracionVariable 
            | declaracionConstante
            | declaracionFuncion 
-           | sentencia 
+           | sentenciaGlobal 
            | importacion ;
 
-importacion : 'import' STRING PYC ;
+importacion : IMPORT STRING PYC ;
 
-declaracionVariable : tipo ID '=' expresion PYC ;
+declaracionVariable : tipo ID (ASIGNACION expresion)? PYC ;
 
-declaracionConstante : 'const' tipo ID '=' expresion PYC ;
+declaracionConstante : CONST tipo ID ASIGNACION expresion PYC ;
 
 declaracionFuncion : tipo ID PA parametros? PC LA sentencia* LC ;
 
@@ -21,6 +21,12 @@ parametros : parametro (COMA parametro)* ;
 
 parametro : tipo ID ;
 
+// Sentencias que pueden estar en el ámbito global
+sentenciaGlobal : sentenciaPrint
+                | sentenciaReturn
+                | bloque ;
+
+// Sentencias que solo pueden estar dentro de funciones
 sentencia : sentenciaAsignacion
          | sentenciaIf
          | sentenciaFor
@@ -31,66 +37,90 @@ sentencia : sentenciaAsignacion
          | sentenciaContinue
          | bloque ;
 
-sentenciaAsignacion : ID '=' expresion PYC ;
+sentenciaAsignacion : ID ASIGNACION expresion PYC ;
 
-sentenciaIf : 'if' PA expresion PC sentencia ('else' sentencia)? ;
+sentenciaIf : IF PA expresion PC sentencia (ELSE sentencia)? ;
 
-sentenciaFor : 'for' PA (declaracionVariable | sentenciaAsignacion | PYC) expresion? PYC expresion? PC sentencia ;
+sentenciaFor : FOR PA (declaracionVariable | sentenciaAsignacion | PYC) expresion? PYC expresion? PC sentencia ;
 
-sentenciaWhile : 'while' PA expresion PC sentencia ;
+sentenciaWhile : WHILE PA expresion PC sentencia ;
 
-sentenciaPrint : 'print' expresion PYC ;
+sentenciaPrint : PRINT expresion PYC ;
 
-sentenciaReturn : 'return' expresion? PYC ;
+sentenciaReturn : RETURN expresion? PYC ;
 
-sentenciaBreak : 'break' PYC ;
+sentenciaBreak : BREAK PYC ;
 
-sentenciaContinue : 'continue' PYC ;
+sentenciaContinue : CONTINUE PYC ;
 
 bloque : LA sentencia* LC ;
 
 expresion : expresionLogica ;
 
-expresionLogica : expresionComparacion (('&&' | '||') expresionComparacion)* ;
+expresionLogica : expresionComparacion ((AND | OR) expresionComparacion)* ;
 
-expresionComparacion : expresionAritmetica (('==' | '!=' | '<' | '>' | '<=' | '>=') expresionAritmetica)* ;
+expresionComparacion : expresionAritmetica ((IGUAL | DIFERENTE | MENOR | MAYOR | MENOR_IGUAL | MAYOR_IGUAL) expresionAritmetica)* ;
 
-expresionAritmetica : termino (('+' | '-') termino)* ;
+expresionAritmetica : termino ((MAS | MENOS) termino)* ;
 
-termino : factor (('*' | '/' | '%') factor)* ;
+termino : factor ((MULTIPLICACION | DIVISION | MODULO) factor)* ;
 
 factor : PA expresion PC
        | ID
        | INTEGER
        | FLOAT
        | STRING
-       | BOOLEAN
+       | CHAR
+       | TRUE
+       | FALSE
        | llamadaFuncion
-       | ('!' | '-') factor ;
+       | (NOT | MENOS) factor ;
 
 llamadaFuncion : ID PA argumentos? PC ;
 
 argumentos : expresion (COMA expresion)* ;
 
 // 📌 Tipos de datos
-tipo : 'int' | 'float' | 'string' | 'boolean' | 'void' ;
+tipo : INT | FLOAT_TYPE | STRING_TYPE | CHAR_TYPE | BOOLEAN_TYPE | VOID ;
 
-// 📌 Reglas léxicas
+// 📌 Reglas léxicas (ORDEN IMPORTANTE: específicos antes que generales)
 
-// 🆔 Identificadores
-ID          : [a-zA-Z][a-zA-Z0-9_]* ;
-
-// 🔢 Literales
-INTEGER     : [0-9]+ ;
-FLOAT       : [0-9]+ '.' [0-9]+ ;
-STRING      : '"' (~["\r\n] | '\\\\"' | '\\"')* '"' ;
-BOOLEAN     : 'true' | 'false' ;
-
-// 🏷️ Palabras clave
-KEYWORD     : 'var' | 'if' | 'else' | 'print' | 'while' | 'for' | 'function' | 'return' | 'break' | 'continue' | 'const' | 'import' ;
+// 🏷️ Palabras clave (DEBEN IR ANTES QUE ID)
+IMPORT      : 'import' ;
+CONST       : 'const' ;
+INT         : 'int' ;
+FLOAT_TYPE  : 'float' ;
+STRING_TYPE : 'string' ;
+CHAR_TYPE   : 'char' ;
+BOOLEAN_TYPE: 'boolean' ;
+VOID        : 'void' ;
+IF          : 'if' ;
+ELSE        : 'else' ;
+PRINT       : 'print' ;
+WHILE       : 'while' ;
+FOR         : 'for' ;
+RETURN      : 'return' ;
+BREAK       : 'break' ;
+CONTINUE    : 'continue' ;
+TRUE        : 'true' ;
+FALSE       : 'false' ;
 
 // 🔣 Operadores
-OPERATOR    : '+' | '-' | '*' | '/' | '%' | '=' | '==' | '!=' | '<' | '>' | '<=' | '>=' | '&&' | '||' | '!' ;
+ASIGNACION    : '=' ;
+IGUAL         : '==' ;
+DIFERENTE     : '!=' ;
+MENOR         : '<' ;
+MAYOR         : '>' ;
+MENOR_IGUAL   : '<=' ;
+MAYOR_IGUAL   : '>=' ;
+AND           : '&&' ;
+OR            : '||' ;
+NOT           : '!' ;
+MAS           : '+' ;
+MENOS         : '-' ;
+MULTIPLICACION: '*' ;
+DIVISION      : '/' ;
+MODULO        : '%' ;
 
 // ✨ Separadores
 PA : '(';
@@ -100,6 +130,16 @@ LC : '}';
 PYC : ';';
 PUNTO : '.';
 COMA : ',';
+
+// 🔢 Literales
+INTEGER     : [0-9]+ ;
+FLOAT       : [0-9]+ '.' [0-9]+ ;
+STRING      : '"' (~["\r\n] | '\\\\"' | '\\"')* '"' ;
+CHAR        : '\'' . '\'' ;
+BOOLEAN     : TRUE | FALSE ;
+
+// 🆔 Identificadores (DEBE IR AL FINAL)
+ID          : [a-zA-Z][a-zA-Z0-9_]* ;
 
 // 🧹 Ignorar espacios en blanco y comentarios
 WS          : [ \t\r\n]+ -> skip ;

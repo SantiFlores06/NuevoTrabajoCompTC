@@ -99,19 +99,36 @@ public class App {
                 generarImagenArbolSintactico(tree, parser);
 
                 // 4. ANÁLISIS SEMÁNTICO
+                System.out.println("\n=== ANÁLISIS SEMÁNTICO ===");
                 SimbolosListener listener = new SimbolosListener();
                 ParseTreeWalker walker = new ParseTreeWalker();
                 walker.walk(listener, tree);
 
+                // Mostrar tabla de símbolos
                 TablaSimbolos tabla = listener.getTablaSimbolos();
                 tabla.imprimir();
 
-                List<String> erroresSemanticos = listener.getErrores();
-                if (!erroresSemanticos.isEmpty()) {
-                    System.out.println("\n=== ERRORES SEMÁNTICOS ===");
-                    erroresSemanticos.forEach(System.out::println);
+                // Mostrar errores críticos
+                List<String> erroresCriticos = listener.getErroresCriticos();
+                if (!erroresCriticos.isEmpty()) {
+                    System.out.println("\n=== ERRORES CRÍTICOS ===");
+                    erroresCriticos.forEach(System.out::println);
+                }
+
+                // Mostrar advertencias
+                List<String> advertencias = listener.getAdvertencias();
+                if (!advertencias.isEmpty()) {
+                    System.out.println("\n=== ADVERTENCIAS ===");
+                    advertencias.forEach(System.out::println);
+                }
+
+                // Resumen final
+                if (listener.tieneErrores()) {
+                    System.out.println("\n❌ Análisis semántico completado con " + erroresCriticos.size() + " errores críticos.");
+                } else if (listener.tieneAdvertencias()) {
+                    System.out.println("\n⚠️ Análisis semántico completado con " + advertencias.size() + " advertencias.");
                 } else {
-                    System.out.println("\n✅ Análisis semántico completado sin errores.");
+                    System.out.println("\n✅ Análisis semántico completado sin errores ni advertencias.");
                 }
                 
             } catch (ParseCancellationException e) {

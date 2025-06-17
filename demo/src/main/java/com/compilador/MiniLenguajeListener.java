@@ -88,6 +88,16 @@ public interface MiniLenguajeListener extends ParseTreeListener {
 	 */
 	void exitParametro(MiniLenguajeParser.ParametroContext ctx);
 	/**
+	 * Enter a parse tree produced by {@link MiniLenguajeParser#sentenciaGlobal}.
+	 * @param ctx the parse tree
+	 */
+	void enterSentenciaGlobal(MiniLenguajeParser.SentenciaGlobalContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link MiniLenguajeParser#sentenciaGlobal}.
+	 * @param ctx the parse tree
+	 */
+	void exitSentenciaGlobal(MiniLenguajeParser.SentenciaGlobalContext ctx);
+	/**
 	 * Enter a parse tree produced by {@link MiniLenguajeParser#sentencia}.
 	 * @param ctx the parse tree
 	 */

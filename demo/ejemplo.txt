@@ -1,9 +1,13 @@
 // Variables con diferentes tipos de datos
-int suma(int a, int b) {
-    return a + b;
-}
+int numero = 42;
+double pi = 3.14159;
+String mensaje = "Hola, mundo!";
+char letra = 'A';
+boolean condicion = true;
 
-void main() {
-    int resultado;
-    resultado = suma(5, 3);
-}asd
+// Estructura de control if-else
+if (numero > 10) {
+    System.out.println(mensaje);
+} else {
+    System.out.println("Número pequeo");
+}

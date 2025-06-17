@@ -112,6 +112,18 @@ public class MiniLenguajeBaseListener implements MiniLenguajeListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
+	@Override public void enterSentenciaGlobal(MiniLenguajeParser.SentenciaGlobalContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitSentenciaGlobal(MiniLenguajeParser.SentenciaGlobalContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
 	@Override public void enterSentencia(MiniLenguajeParser.SentenciaContext ctx) { }
 	/**
 	 * {@inheritDoc}

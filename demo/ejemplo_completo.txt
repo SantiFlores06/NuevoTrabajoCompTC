@@ -1,0 +1,43 @@
+// Ejemplo completo para mostrar análisis léxico, sintáctico y semántico
+import "stdio.h";
+
+// Variables globales con diferentes tipos
+int x = 10;
+float y = 5.5;
+string mensaje = "Hola mundo";
+boolean activo = true;
+
+// Constantes
+const int MAX_VALOR = 100;
+const string NOMBRE = "MiniLenguaje";
+
+// Variable no inicializada (advertencia)
+int variableNoInicializada;
+
+// Variable no usada (advertencia)
+int variableNoUsada = 5;
+
+// Función principal
+int main(int a, int b) {
+    a = a + b;
+    b = b * 2;
+    return a;
+}
+
+// Función que no se usa (advertencia)
+void funcionNoUsada() {
+    print "Esta función no se llama";
+}
+
+// Función con parámetros no usados
+int calcular(int x, int y, int z) {
+    // z no se usa (advertencia)
+    return x + y;
+}
+
+// Llamada a función
+int resultado = calcular(5, 10, 15);
+print resultado;
+
+// Librería no usada (advertencia)
+import "math.h"; 

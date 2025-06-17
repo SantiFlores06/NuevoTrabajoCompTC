@@ -59,6 +59,12 @@ public interface MiniLenguajeVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitParametro(MiniLenguajeParser.ParametroContext ctx);
 	/**
+	 * Visit a parse tree produced by {@link MiniLenguajeParser#sentenciaGlobal}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitSentenciaGlobal(MiniLenguajeParser.SentenciaGlobalContext ctx);
+	/**
 	 * Visit a parse tree produced by {@link MiniLenguajeParser#sentencia}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
