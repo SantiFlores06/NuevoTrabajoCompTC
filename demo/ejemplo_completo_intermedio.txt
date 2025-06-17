@@ -1,0 +1,10 @@
+function main:
+param a
+param b
+a = null
+b = null
+function funcionNoUsada:
+function calcular:
+param x
+param y
+param z

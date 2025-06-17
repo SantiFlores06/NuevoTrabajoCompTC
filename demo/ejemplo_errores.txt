@@ -1,0 +1,32 @@
+// Errores léxicos
+int numero = 42.5;  // Error: asignación de float a int
+string mensaje = 'Hola';  // Error: comillas simples en string
+char letra = "A";  // Error: comillas dobles en char
+float pi = 3,14159;  // Error: coma en lugar de punto decimal
+
+// Errores sintácticos
+if (numero > 10) {  // Error: falta llave de cierre
+    print(mensaje);
+} else {  // Error: falta llave de apertura
+    print("Número pequeño");
+}
+
+// Errores semánticos
+int x = 10;
+float y = x;  // Error: asignación de int a float sin cast
+string z = x;  // Error: asignación de int a string
+
+// Variable no declarada
+print(noExiste);  // Error: variable no declarada
+
+// Error en operación
+int resultado = x + mensaje;  // Error: suma de int con string
+
+// Error en operación con tipos incompatibles
+int a = 10;
+string b = "20";
+int c = a + b;  // Error: suma de int con string
+
+// Error en operación con tipos incompatibles
+float d = 3.14;
+int e = d;  // Error: asignación de float a int sin cast 

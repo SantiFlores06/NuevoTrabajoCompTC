@@ -1,0 +1,13 @@
+// Variables con diferentes tipos de datos
+int numero = 42;
+float pi = 3.14159;
+string mensaje = "Hola, mundo!";
+char letra = 'A';
+boolean condicion = true;
+
+// Estructura de control if-else
+if (numero > 10) {
+    print(mensaje);
+} else {
+    print("Número pequeño");
+} 

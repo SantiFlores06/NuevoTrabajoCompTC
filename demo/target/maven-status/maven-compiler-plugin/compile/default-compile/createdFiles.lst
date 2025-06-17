@@ -25,7 +25,9 @@ com\compilador\TablaSimbolos.class
 com\compilador\App$1.class
 com\compilador\MiniLenguajeBaseVisitor.class
 com\compilador\MiniLenguajeParser$ImportacionContext.class
+com\compilador\generacion\CodigoVisitor.class
 com\compilador\MiniLenguajeParser$ExpresionContext.class
+com\compilador\generacion\GeneradorCodigo.class
 com\compilador\App.class
 com\compilador\MiniLenguajeListener.class
 com\compilador\MiniLenguajeParser$SentenciaPrintContext.class
