@@ -26,6 +26,13 @@
       <version>${antlr.version}</version>
     </dependency>
     
+    <!-- ANTLR Tools para visualización del árbol -->
+    <dependency>
+      <groupId>org.antlr</groupId>
+      <artifactId>antlr4</artifactId>
+      <version>${antlr.version}</version>
+    </dependency>
+    
     <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
@@ -94,7 +101,7 @@
         </executions>
         <configuration>
           <sourceDirectory>${basedir}/src/main/antlr4</sourceDirectory>
-          <outputDirectory>${basedir}/src/main/java/com/compilador</outputDirectory>
+          <outputDirectory>${basedir}/src/main/java</outputDirectory>
           <visitor>true</visitor>
           <listener>true</listener>
         </configuration>

@@ -1,7 +1,9 @@
-// Este es un programa de ejemplo
-var x = 10;
-var mensaje = "Hola mundo!";
-
-if (x > 5) {
-    print mensaje;
+// Variables con diferentes tipos de datos
+int suma(int a, int b) {
+    return a + b;
 }
+
+void main() {
+    int resultado;
+    resultado = suma(5, 3);
+}asd
