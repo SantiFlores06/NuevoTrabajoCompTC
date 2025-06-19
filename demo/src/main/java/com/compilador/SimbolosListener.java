@@ -478,4 +478,8 @@ public class SimbolosListener extends MiniLenguajeBaseListener {
     public boolean tieneAdvertencias() {
         return !advertencias.isEmpty();
     }
+
+    public Map<String, String> getPrototiposFunciones() {
+        return prototiposFunciones;
+    }
 } 

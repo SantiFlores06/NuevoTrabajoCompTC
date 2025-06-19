@@ -79,6 +79,10 @@ public class TablaSimbolos {
         return nombreScope;
     }
 
+    public java.util.Collection<Simbolo> getSimbolos() {
+        return simbolos.values();
+    }
+
     public static class Simbolo {
         private String nombre;
         private String tipo;

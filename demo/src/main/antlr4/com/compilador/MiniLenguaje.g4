@@ -24,7 +24,8 @@ parametro : tipo ID ;
 // Sentencias que pueden estar en el ámbito global
 sentenciaGlobal : sentenciaPrint
                 | sentenciaReturn
-                | bloque ;
+                | bloque 
+                ;
 
 // Sentencias que solo pueden estar dentro de funciones
 sentencia : sentenciaAsignacion
@@ -35,7 +36,8 @@ sentencia : sentenciaAsignacion
          | sentenciaReturn
          | sentenciaBreak
          | sentenciaContinue
-         | bloque ;
+         | bloque 
+         ;
 
 sentenciaAsignacion : ID ASIGNACION expresion PYC ;
 

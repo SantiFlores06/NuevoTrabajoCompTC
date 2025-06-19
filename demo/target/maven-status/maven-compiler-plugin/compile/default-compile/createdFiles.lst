@@ -2,7 +2,6 @@ com\compilador\MiniLenguajeParser$FactorContext.class
 com\compilador\MiniLenguajeParser$LlamadaFuncionContext.class
 com\compilador\MiniLenguajeParser$ExpresionLogicaContext.class
 com\compilador\MiniLenguajeParser$SentenciaContext.class
-com\compilador\App$2.class
 com\compilador\MiniLenguajeLexer.class
 com\compilador\MiniLenguajeParser$ProgramaContext.class
 com\compilador\MiniLenguajeParser$SentenciaContinueContext.class

@@ -52,3 +52,6 @@ Link Repositorio GitHub proyecto viejo: https://github.com/SantiFlores06/Trabajo
 - Se agregaron ejemplos de prueba cortos y válidos en la carpeta `demo/` (por ejemplo: `ejemplo_asignacion.txt`, `ejemplo_if.txt`, `ejemplo_operaciones.txt`).
 - Ahora la visualización gráfica del árbol sintáctico se muestra en una ventana con barras de desplazamiento (scroll), permitiendo navegar árboles grandes cómodamente.
 - Para ver el árbol sintáctico gráficamente, se utiliza `TreeViewer` de ANTLR dentro de un `JScrollPane` en un `JFrame`.
+- **Análisis léxico:** Ahora se muestran correctamente todos los tokens del archivo fuente, ya que se fuerza el consumo de todos los tokens antes de imprimirlos.
+- **Árbol sintáctico gráfico:** Se agregó una ventana gráfica (con scroll) que muestra el árbol sintáctico generado para el archivo de entrada.
+- **Código intermedio:** El código intermedio generado se muestra por consola y también se guarda automáticamente en un archivo de texto llamado `codigo_intermedio.txt` en la carpeta de ejecución.
