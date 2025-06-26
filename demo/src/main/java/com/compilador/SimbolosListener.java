@@ -72,7 +72,7 @@ public class SimbolosListener extends MiniLenguajeBaseListener {
         }
         
         String valor = ctx.expresion() != null ? ctx.expresion().getText() : "undefined";
-        scopeActual.insertar(nombre, tipoDeclarado, valor);
+        scopeActual.insertar(nombre, tipoDeclarado, valor, "variable");
         
         String ambito = enFuncion ? "funcion:" + funcionActual : "global";
         System.out.println("Variable declarada: " + nombre + " (" + tipoDeclarado + ") en " + ambito);
@@ -96,7 +96,7 @@ public class SimbolosListener extends MiniLenguajeBaseListener {
         constantes.put(nombre, true);
         tiposVariables.put(nombre, tipoDeclarado);
         variablesInicializadas.put(nombre, true);
-        scopeActual.insertar(nombre, tipoDeclarado, ctx.expresion().getText());
+        scopeActual.insertar(nombre, tipoDeclarado, ctx.expresion().getText(), "constante");
         System.out.println("Constante declarada: " + nombre + " (" + tipoDeclarado + ")");
     }
 
@@ -120,7 +120,7 @@ public class SimbolosListener extends MiniLenguajeBaseListener {
         prototiposFunciones.put(nombre, prototipo.toString());
         
         // Insertar la función en el scope global
-        scopeActual.insertar(nombre, tipoRetorno, "funcion");
+        scopeActual.insertar(nombre, tipoRetorno, "funcion", "funcion");
         
         // Crear scope hijo para la función
         TablaSimbolos scopeFuncion = new TablaSimbolos(scopeActual, "funcion:" + nombre);
@@ -138,7 +138,7 @@ public class SimbolosListener extends MiniLenguajeBaseListener {
             for (MiniLenguajeParser.ParametroContext param : ctx.parametros().parametro()) {
                 String paramNombre = param.ID().getText();
                 String paramTipo = param.tipo().getText();
-                scopeActual.insertar(paramNombre, paramTipo, "parametro");
+                scopeActual.insertar(paramNombre, paramTipo, "parametro", "parametro");
                 parametrosNoUsados.add(paramNombre);
                 tiposVariables.put(paramNombre, paramTipo);
                 System.out.println("Parametro declarado: " + paramNombre + " (" + paramTipo + ") en funcion: " + nombre);

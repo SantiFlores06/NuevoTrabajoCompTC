@@ -208,13 +208,10 @@ public class App {
     private static void imprimirScopeRecursivo(TablaSimbolos tabla, Map<String, String> prototipos, String ambito) {
         // Imprimir todas las variables y parámetros del scope actual
         for (TablaSimbolos.Simbolo simbolo : tabla.getSimbolos()) {
-            String categoria = "variable";
+            String categoria = simbolo.getCategoria();
             String parametros = "";
             
-            if (simbolo.getTipo().equals("parametro")) {
-                categoria = "parametro";
-            } else if (simbolo.getTipo().equals("funcion")) {
-                categoria = "funcion";
+            if ("funcion".equals(categoria)) {
                 String nombreFuncion = simbolo.getNombre();
                 String prototipo = prototipos.get(nombreFuncion);
                 if (prototipo != null && prototipo.contains("(")) {

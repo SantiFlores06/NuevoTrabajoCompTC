@@ -1,0 +1,12 @@
+a = 0
+b = 0
+func_main:
+// Inicio de función: main
+a = 3
+b = 7
+t0 = a < b
+if !t0 goto L0
+print a
+L0:
+// Fin de función: main
+return 0

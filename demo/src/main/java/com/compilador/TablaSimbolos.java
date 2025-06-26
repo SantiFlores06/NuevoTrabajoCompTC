@@ -23,11 +23,16 @@ public class TablaSimbolos {
         this.nombreScope = nombreScope;
     }
 
-    public void insertar(String nombre, String tipo, String valor) {
+    public void insertar(String nombre, String tipo, String valor, String categoria) {
         if (simbolos.containsKey(nombre)) {
             throw new RuntimeException("Variable '" + nombre + "' ya declarada en el scope " + nombreScope);
         }
-        simbolos.put(nombre, new Simbolo(nombre, tipo, valor));
+        simbolos.put(nombre, new Simbolo(nombre, tipo, valor, categoria));
+    }
+
+    // Método sobrecargado para mantener compatibilidad
+    public void insertar(String nombre, String tipo, String valor) {
+        insertar(nombre, tipo, valor, "variable");
     }
 
     public Simbolo buscar(String nombre) {
@@ -56,14 +61,15 @@ public class TablaSimbolos {
 
     public void imprimir() {
         System.out.println("\n=== TABLA DE SÍMBOLOS (" + nombreScope + ") ===");
-        System.out.printf("%-20s %-15s %-20s\n", "NOMBRE", "TIPO", "VALOR");
-        System.out.println("------------------------------------------------");
+        System.out.printf("%-20s %-15s %-20s %-15s\n", "NOMBRE", "TIPO", "VALOR", "CATEGORIA");
+        System.out.println("------------------------------------------------------------");
         
         for (Simbolo simbolo : simbolos.values()) {
-            System.out.printf("%-20s %-15s %-20s\n", 
+            System.out.printf("%-20s %-15s %-20s %-15s\n", 
                              simbolo.getNombre(), 
                              simbolo.getTipo(), 
-                             simbolo.getValor());
+                             simbolo.getValor(),
+                             simbolo.getCategoria());
         }
         
         if (padre != null) {
@@ -96,16 +102,19 @@ public class TablaSimbolos {
         private String nombre;
         private String tipo;
         private String valor;
+        private String categoria;
 
-        public Simbolo(String nombre, String tipo, String valor) {
+        public Simbolo(String nombre, String tipo, String valor, String categoria) {
             this.nombre = nombre;
             this.tipo = tipo;
             this.valor = valor;
+            this.categoria = categoria;
         }
 
         public String getNombre() { return nombre; }
         public String getTipo() { return tipo; }
         public String getValor() { return valor; }
+        public String getCategoria() { return categoria; }
         public void setValor(String valor) { this.valor = valor; }
     }
 } 
