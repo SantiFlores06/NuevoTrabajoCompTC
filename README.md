@@ -94,6 +94,243 @@ El compilador implementado sigue una arquitectura clásica de varias fases, cada
   - El optimizador ejecuta estas técnicas de forma iterativa hasta que el código ya no puede mejorarse más.
   - El resultado se muestra por consola y se guarda en `codigo_optimizado.txt`.
 
+## Código Optimizado
+
+El optimizador implementado aplica tres técnicas principales de optimización:
+
+### 1. Propagación y Plegado de Constantes
+- **Objetivo:** Reducir el número de operaciones en tiempo de ejecución
+- **Funcionamiento:** 
+  - Identifica variables con valores constantes conocidos
+  - Sustituye referencias a estas variables por sus valores
+  - Resuelve operaciones aritméticas con operandos constantes
+  - Respeta los ámbitos: constantes globales solo se propagan globalmente, locales solo dentro de su función
+
+**Ejemplo:**
+```
+// Código original
+const int x = 5;
+int y = x + 3;
+print y;
+
+// Código optimizado
+print 8;
+```
+
+### 2. Eliminación de Código Muerto
+- **Objetivo:** Eliminar código que no contribuye al resultado final
+- **Funcionamiento:**
+  - Identifica variables temporales que se asignan pero nunca se usan
+  - Elimina las líneas de asignación correspondientes
+  - Reduce el tamaño del código generado
+
+**Ejemplo:**
+```
+// Código original
+t1 = 5 + 3
+t2 = t1 * 2
+print t2
+t3 = 10  // No se usa
+
+// Código optimizado
+t1 = 5 + 3
+t2 = t1 * 2
+print t2
+```
+
+### 3. Simplificación de Expresiones
+- **Objetivo:** Aplicar identidades algebraicas para simplificar expresiones
+- **Funcionamiento:**
+  - `x + 0` → `x`
+  - `x * 1` → `x`
+  - `x * 0` → `0`
+  - `x - 0` → `x`
+  - `x / 1` → `x`
+
+**Ejemplo:**
+```
+// Código original
+t1 = x + 0
+t2 = y * 1
+t3 = z * 0
+
+// Código optimizado
+t1 = x
+t2 = y
+t3 = 0
+```
+
+### Salida del Optimizador
+El optimizador genera dos tipos de salida:
+1. **Código optimizado:** Guardado en `[archivo].optimizado.txt`
+2. **Reporte de optimizaciones:** Mostrado en consola con detalles de las transformaciones aplicadas
+
+## Gramática Completa del Lenguaje
+
+La gramática del lenguaje está definida en el archivo `MiniLenguaje.g4` y soporta las siguientes construcciones:
+
+### Reglas del Parser
+
+```antlr
+// Estructura principal del programa
+programa : declaracion* EOF ;
+
+// Declaraciones permitidas
+declaracion : declaracionVariable 
+           | declaracionConstante
+           | declaracionFuncion 
+           | sentenciaGlobal 
+           | importacion ;
+
+// Importaciones
+importacion : IMPORT STRING PYC ;
+
+// Declaración de variables
+declaracionVariable : tipo ID (ASIGNACION expresion)? PYC ;
+
+// Declaración de constantes
+declaracionConstante : CONST tipo ID ASIGNACION expresion PYC ;
+
+// Declaración de funciones
+declaracionFuncion : tipo ID PA parametros? PC LA sentencia* LC ;
+
+// Parámetros de función
+parametros : parametro (COMA parametro)* ;
+parametro : tipo ID ;
+
+// Sentencias globales (fuera de funciones)
+sentenciaGlobal : sentenciaPrint
+                | sentenciaReturn
+                | sentenciaIf
+                | sentenciaWhile
+                | sentenciaFor
+                | bloque ;
+
+// Sentencias dentro de funciones
+sentencia : sentenciaAsignacion
+         | sentenciaIf
+         | sentenciaFor
+         | sentenciaWhile
+         | sentenciaPrint
+         | sentenciaReturn
+         | sentenciaBreak
+         | sentenciaContinue
+         | bloque ;
+
+// Tipos de sentencias
+sentenciaAsignacion : ID ASIGNACION expresion PYC ;
+sentenciaIf : IF PA expresion PC sentencia (ELSE sentencia)? ;
+sentenciaFor : FOR PA (declaracionVariable | sentenciaAsignacion | PYC) expresion? PYC expresion? PC sentencia ;
+sentenciaWhile : WHILE PA expresion PC sentencia ;
+sentenciaPrint : PRINT expresion PYC ;
+sentenciaReturn : RETURN expresion? PYC ;
+sentenciaBreak : BREAK PYC ;
+sentenciaContinue : CONTINUE PYC ;
+bloque : LA sentencia* LC ;
+
+// Jerarquía de expresiones
+expresion : expresionLogica ;
+expresionLogica : expresionComparacion ((AND | OR) expresionComparacion)* ;
+expresionComparacion : expresionAritmetica ((IGUAL | DIFERENTE | MENOR | MAYOR | MENOR_IGUAL | MAYOR_IGUAL) expresionAritmetica)* ;
+expresionAritmetica : termino ((MAS | MENOS) termino)* ;
+termino : factor ((MULTIPLICACION | DIVISION | MODULO) factor)* ;
+factor : PA expresion PC
+       | ID
+       | INTEGER
+       | FLOAT
+       | DOUBLE
+       | STRING
+       | CHAR
+       | TRUE
+       | FALSE
+       | llamadaFuncion
+       | (NOT | MENOS) factor ;
+
+// Llamadas a funciones
+llamadaFuncion : ID PA argumentos? PC ;
+argumentos : expresion (COMA expresion)* ;
+
+// Tipos de datos
+tipo : INT | FLOAT_TYPE | DOUBLE_TYPE | STRING_TYPE | CHAR_TYPE | BOOLEAN_TYPE | VOID ;
+```
+
+### Reglas Léxicas
+
+```antlr
+// Palabras clave
+IMPORT      : 'import' ;
+CONST       : 'const' ;
+INT         : 'int' ;
+FLOAT_TYPE  : 'float' ;
+DOUBLE_TYPE : 'double' ;
+STRING_TYPE : 'string' ;
+CHAR_TYPE   : 'char' ;
+BOOLEAN_TYPE: 'boolean' ;
+VOID        : 'void' ;
+IF          : 'if' ;
+ELSE        : 'else' ;
+PRINT       : 'print' ;
+WHILE       : 'while' ;
+FOR         : 'for' ;
+RETURN      : 'return' ;
+BREAK       : 'break' ;
+CONTINUE    : 'continue' ;
+TRUE        : 'true' ;
+FALSE       : 'false' ;
+
+// Operadores
+ASIGNACION    : '=' ;
+IGUAL         : '==' ;
+DIFERENTE     : '!=' ;
+MENOR         : '<' ;
+MAYOR         : '>' ;
+MENOR_IGUAL   : '<=' ;
+MAYOR_IGUAL   : '>=' ;
+AND           : '&&' ;
+OR            : '||' ;
+NOT           : '!' ;
+MAS           : '+' ;
+MENOS         : '-' ;
+MULTIPLICACION: '*' ;
+DIVISION      : '/' ;
+MODULO        : '%' ;
+
+// Separadores
+PA : '(';
+PC : ')';
+LA : '{';
+LC : '}';
+PYC : ';';
+PUNTO : '.';
+COMA : ',';
+
+// Literales
+INTEGER     : [0-9]+ ;
+FLOAT       : [0-9]+ '.' [0-9]+ ;
+DOUBLE      : [0-9]+ '.' [0-9]+([eE][+-]?[0-9]+)? ;
+STRING      : '"' (~["\r\n] | '\\\\"' | '\\"')* '"' ;
+CHAR        : '\'' . '\'' ;
+BOOLEAN     : TRUE | FALSE ;
+
+// Identificadores
+ID          : [a-zA-Z][a-zA-Z0-9_]* ;
+
+// Comentarios y espacios
+WS          : [ \t\r\n]+ -> skip ;
+COMMENT     : '//' ~[\r\n]* -> skip ;
+BLOCK_COMMENT : '/*' .*? '*/' -> skip ;
+```
+
+### Características del Lenguaje
+
+- **Tipos de datos:** `int`, `float`, `double`, `string`, `char`, `boolean`, `void`
+- **Declaraciones:** variables, constantes, funciones
+- **Estructuras de control:** `if-else`, `while`, `for`
+- **Operadores:** aritméticos (+, -, *, /, %), comparación (==, !=, <, >, <=, >=), lógicos (&&, ||, !)
+- **Funciones:** con parámetros y valores de retorno
+- **Importaciones:** de librerías externas
+- **Comentarios:** de línea (`//`) y de bloque (`/* */`)
+
 ## Ejemplo de Flujo Completo
 
 1. **Entrada:** Un archivo fuente en MiniLenguaje (por ejemplo, `ejemplo_completo.txt`).
