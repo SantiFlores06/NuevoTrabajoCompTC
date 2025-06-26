@@ -132,6 +132,8 @@ MODULO        : '%' ;
 // Separadores
 PA : '(';
 PC : ')';
+PRA : '[';
+PRC : ']';
 LA : '{';
 LC : '}';
 PYC : ';';
