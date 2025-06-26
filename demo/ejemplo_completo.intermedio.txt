@@ -1,0 +1,41 @@
+// Import: "stdio.h"
+x = 10
+y = 5.5
+mensaje = "Hola mundo"
+activo = true
+// Constante: int MAX_VALOR = 100
+MAX_VALOR = 100
+// Constante: string NOMBRE = "MiniLenguaje"
+NOMBRE = "MiniLenguaje"
+variableNoInicializada = 0
+variableNoUsada = 5
+func_main:
+// Inicio de función: main
+param int a
+param int b
+t0 = a + b
+a = t0
+t1 = b * 2
+b = t1
+return a
+// Fin de función: main
+return 0
+func_funcionNoUsada:
+// Inicio de función: funcionNoUsada
+w = 10
+print "Esta función no se llama"
+// Fin de función: funcionNoUsada
+return 0
+func_calcular:
+// Inicio de función: calcular
+param int x
+param int y
+param int z
+t2 = x + y
+return t2
+// Fin de función: calcular
+return 0
+t3 = call calcular(5, 10, 15)
+resultado = t3
+print resultado
+// Import: "math.h"

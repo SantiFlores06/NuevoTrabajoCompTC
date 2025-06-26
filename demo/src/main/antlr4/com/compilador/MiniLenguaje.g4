@@ -1,6 +1,6 @@
 grammar MiniLenguaje;
 
-// 📌 Reglas del parser
+//  Reglas del parser
 programa : declaracion* EOF ;
 
 declaracion : declaracionVariable 
@@ -24,6 +24,9 @@ parametro : tipo ID ;
 // Sentencias que pueden estar en el ámbito global
 sentenciaGlobal : sentenciaPrint
                 | sentenciaReturn
+                | sentenciaIf
+                | sentenciaWhile
+                | sentenciaFor
                 | bloque 
                 ;
 
@@ -71,6 +74,7 @@ factor : PA expresion PC
        | ID
        | INTEGER
        | FLOAT
+       | DOUBLE
        | STRING
        | CHAR
        | TRUE
@@ -82,16 +86,17 @@ llamadaFuncion : ID PA argumentos? PC ;
 
 argumentos : expresion (COMA expresion)* ;
 
-// 📌 Tipos de datos
-tipo : INT | FLOAT_TYPE | STRING_TYPE | CHAR_TYPE | BOOLEAN_TYPE | VOID ;
+//  Tipos de datos
+tipo : INT | FLOAT_TYPE | DOUBLE_TYPE | STRING_TYPE | CHAR_TYPE | BOOLEAN_TYPE | VOID ;
 
-// 📌 Reglas léxicas (ORDEN IMPORTANTE: específicos antes que generales)
+//  Reglas léxicas (ORDEN IMPORTANTE: específicos antes que generales)
 
-// 🏷️ Palabras clave (DEBEN IR ANTES QUE ID)
+//  Palabras clave (DEBEN IR ANTES QUE ID)
 IMPORT      : 'import' ;
 CONST       : 'const' ;
 INT         : 'int' ;
 FLOAT_TYPE  : 'float' ;
+DOUBLE_TYPE : 'double' ;
 STRING_TYPE : 'string' ;
 CHAR_TYPE   : 'char' ;
 BOOLEAN_TYPE: 'boolean' ;
@@ -107,7 +112,7 @@ CONTINUE    : 'continue' ;
 TRUE        : 'true' ;
 FALSE       : 'false' ;
 
-// 🔣 Operadores
+//  Operadores
 ASIGNACION    : '=' ;
 IGUAL         : '==' ;
 DIFERENTE     : '!=' ;
@@ -124,7 +129,7 @@ MULTIPLICACION: '*' ;
 DIVISION      : '/' ;
 MODULO        : '%' ;
 
-// ✨ Separadores
+// Separadores
 PA : '(';
 PC : ')';
 LA : '{';
@@ -133,17 +138,18 @@ PYC : ';';
 PUNTO : '.';
 COMA : ',';
 
-// 🔢 Literales
+//  Literales
 INTEGER     : [0-9]+ ;
 FLOAT       : [0-9]+ '.' [0-9]+ ;
+DOUBLE      : [0-9]+ '.' [0-9]+([eE][+-]?[0-9]+)? ;
 STRING      : '"' (~["\r\n] | '\\\\"' | '\\"')* '"' ;
 CHAR        : '\'' . '\'' ;
 BOOLEAN     : TRUE | FALSE ;
 
-// 🆔 Identificadores (DEBE IR AL FINAL)
+//  Identificadores (DEBE IR AL FINAL)
 ID          : [a-zA-Z][a-zA-Z0-9_]* ;
 
-// 🧹 Ignorar espacios en blanco y comentarios
+//  Ignorar espacios en blanco y comentarios
 WS          : [ \t\r\n]+ -> skip ;
 COMMENT     : '//' ~[\r\n]* -> skip ;
 BLOCK_COMMENT : '/*' .*? '*/' -> skip ;

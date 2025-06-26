@@ -7,6 +7,7 @@ com\compilador\MiniLenguajeParser$ProgramaContext.class
 com\compilador\MiniLenguajeParser$SentenciaContinueContext.class
 com\compilador\MiniLenguajeParser$DeclaracionConstanteContext.class
 com\compilador\MiniLenguajeVisitor.class
+com\compilador\optimacion\Optimizador.class
 com\compilador\MiniLenguajeParser$BloqueContext.class
 com\compilador\MiniLenguajeParser$SentenciaBreakContext.class
 com\compilador\TablaSimbolos$Simbolo.class

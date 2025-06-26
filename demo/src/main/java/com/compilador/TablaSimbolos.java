@@ -9,6 +9,7 @@ public class TablaSimbolos {
     private Map<String, Simbolo> simbolos;
     private TablaSimbolos padre; // Para manejar scopes anidados
     private String nombreScope;
+    private List<TablaSimbolos> hijos = new ArrayList<>();
 
     public TablaSimbolos() {
         this.simbolos = new HashMap<>();
@@ -81,6 +82,14 @@ public class TablaSimbolos {
 
     public java.util.Collection<Simbolo> getSimbolos() {
         return simbolos.values();
+    }
+
+    public void agregarHijo(TablaSimbolos hijo) {
+        hijos.add(hijo);
+    }
+
+    public List<TablaSimbolos> getHijos() {
+        return hijos;
     }
 
     public static class Simbolo {

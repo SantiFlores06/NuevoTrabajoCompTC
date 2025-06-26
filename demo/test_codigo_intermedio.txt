@@ -1,0 +1,17 @@
+// Test de código intermedio
+int x = 5;
+int y = 3;
+int z = x + y * 2;
+print z;
+
+if (x > y) {
+    print "x es mayor";
+} else {
+    print "y es mayor o igual";
+}
+
+int i = 0;
+while (i < 3) {
+    print i;
+    i = i + 1;
+} 

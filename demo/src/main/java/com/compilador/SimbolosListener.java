@@ -52,7 +52,7 @@ public class SimbolosListener extends MiniLenguajeBaseListener {
         String nombre = ctx.ID().getText();
         String tipoDeclarado = ctx.tipo().getText();
         
-        if (tiposVariables.containsKey(nombre)) {
+        if (scopeActual.existe(nombre)) {
             String tipoAnterior = tiposVariables.get(nombre);
             if (!tipoAnterior.equals(tipoDeclarado)) {
                 erroresCriticos.add("Error critico: Variable '" + nombre + "' redefinida con tipo distinto (" + 
@@ -71,8 +71,11 @@ public class SimbolosListener extends MiniLenguajeBaseListener {
             }
         }
         
-        scopeActual.insertar(nombre, tipoDeclarado, ctx.expresion() != null ? ctx.expresion().getText() : "undefined");
-        System.out.println("Variable declarada: " + nombre + " (" + tipoDeclarado + ")");
+        String valor = ctx.expresion() != null ? ctx.expresion().getText() : "undefined";
+        scopeActual.insertar(nombre, tipoDeclarado, valor);
+        
+        String ambito = enFuncion ? "funcion:" + funcionActual : "global";
+        System.out.println("Variable declarada: " + nombre + " (" + tipoDeclarado + ") en " + ambito);
     }
 
     @Override
@@ -116,13 +119,21 @@ public class SimbolosListener extends MiniLenguajeBaseListener {
         prototipo.append(")");
         prototiposFunciones.put(nombre, prototipo.toString());
         
+        // Insertar la función en el scope global
+        scopeActual.insertar(nombre, tipoRetorno, "funcion");
+        
+        // Crear scope hijo para la función
         TablaSimbolos scopeFuncion = new TablaSimbolos(scopeActual, "funcion:" + nombre);
+        scopeActual.agregarHijo(scopeFuncion);
+        
+        // Cambiar al scope de la función
         scopeActual = scopeFuncion;
         enFuncion = true;
         funcionActual = nombre;
         tipoRetornoActual = tipoRetorno;
         parametrosNoUsados.clear();
         
+        // Insertar parámetros en el scope de la función
         if (ctx.parametros() != null) {
             for (MiniLenguajeParser.ParametroContext param : ctx.parametros().parametro()) {
                 String paramNombre = param.ID().getText();
@@ -130,6 +141,7 @@ public class SimbolosListener extends MiniLenguajeBaseListener {
                 scopeActual.insertar(paramNombre, paramTipo, "parametro");
                 parametrosNoUsados.add(paramNombre);
                 tiposVariables.put(paramNombre, paramTipo);
+                System.out.println("Parametro declarado: " + paramNombre + " (" + paramTipo + ") en funcion: " + nombre);
             }
         }
         

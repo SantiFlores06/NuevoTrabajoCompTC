@@ -1,0 +1,35 @@
+int x = 5;
+int y = 3;
+
+void main() {
+    int resultado = x + y * 2;
+    print resultado;
+    
+    if (resultado > 10) {
+        print "Mayor que 10";
+    } else {
+        print "Menor o igual a 10";
+    }
+    
+    int i = 0;
+    while (i < 3) {
+        print i;
+        i = i + 1;
+    }
+}
+
+void calcular(int a, int b) {
+    int suma = a + b;
+    int producto = a * b;
+    print suma;
+    print producto;
+    return suma;
+}
+
+int factorial(int n) {
+    if (n <= 1) {
+        return 1;
+    } else {
+        return n * factorial(n - 1);
+    }
+} 

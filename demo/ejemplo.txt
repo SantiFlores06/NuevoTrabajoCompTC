@@ -1,25 +1,9 @@
-int numero;
-float pi;
-string mensaje;
-char letra;
-boolean condicion;
-float resultado;
 
 void main() {
-    // Variables con diferentes tipos de datos
-    numero = 42;
-    pi = 3.14159;
-    mensaje = "Hola, mundo!";
-    letra = 'A';
-    condicion = true;
-
-    // Estructura de control if-else
-    if (numero > 10) {
-        print(mensaje);
-    } else {
-        print("Número pequeño");
-    }
-
-    // Operación aritmética válida
-    resultado = numero + pi;
+    int x = 0 ;
+    int w = 10 ;
+    int y = 20 ;
+    int z = 30 ;
+    int suma = x + w + y + z;
+    int resta = x - w - y - z;
 } 

@@ -26,6 +26,7 @@ int main(int a, int b) {
 
 // Función que no se usa (advertencia)
 void funcionNoUsada() {
+    int w = 10;
     print "Esta función no se llama";
 }
 

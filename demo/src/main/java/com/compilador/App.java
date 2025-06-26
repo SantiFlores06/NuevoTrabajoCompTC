@@ -17,6 +17,7 @@ import javax.swing.*;
 import java.util.Arrays;
 
 import com.compilador.generacion.CodigoVisitor;
+import com.compilador.optimacion.Optimizador;
 
 public class App {
     // Códigos ANSI para colores
@@ -35,6 +36,16 @@ public class App {
 
         String inputFilePath = args[0];
         System.out.println("Analizando archivo: " + inputFilePath + "\n");
+
+        // Obtener nombre base del archivo fuente (sin extensión)
+        String baseName = inputFilePath;
+        int lastSlash = baseName.lastIndexOf("/");
+        if (lastSlash == -1) lastSlash = baseName.lastIndexOf("\\");
+        if (lastSlash != -1) baseName = baseName.substring(lastSlash + 1);
+        int lastDot = baseName.lastIndexOf('.');
+        if (lastDot != -1) baseName = baseName.substring(0, lastDot);
+        String archivoIntermedio = baseName + ".intermedio.txt";
+        String archivoOptimizado = baseName + ".optimizado.txt";
 
         try {
             // Leer el archivo de entrada
@@ -56,7 +67,7 @@ public class App {
                     token.getCharPositionInLine());
             });
             System.out.println();
-            System.out.println("? Análisis léxico completado sin errores.\n");
+            System.out.println(GREEN + "✓ Análisis léxico completado sin errores." + RESET + "\n");
 
             // Análisis sintáctico
             System.out.println("=== ANÁLISIS SINTÁCTICO ===");
@@ -93,10 +104,10 @@ public class App {
 
             // Mostrar errores sintácticos si los hay
             if (!erroresSintacticos.isEmpty()) {
-                System.out.println("? ERRORES SINTÁCTICOS:");
-                erroresSintacticos.forEach(error -> System.out.println("   " + error));
+                System.out.println(RED + "✗ ERRORES SINTÁCTICOS:" + RESET);
+                erroresSintacticos.forEach(error -> System.out.println(RED + "   " + error + RESET));
             } else {
-                System.out.println("? Análisis sintáctico completado sin errores.\n");
+                System.out.println(GREEN + "✓ Análisis sintáctico completado sin errores." + RESET + "\n");
             }
 
             // Análisis semántico
@@ -112,37 +123,68 @@ public class App {
             List<String> warningsSemanticos = listener.getAdvertencias();
 
             if (!erroresSemanticos.isEmpty()) {
-                System.out.println("\n? ERRORES SEMÁNTICOS:");
-                erroresSemanticos.forEach(error -> System.out.println("   " + error));
+                System.out.println(RED + "\n✗ ERRORES SEMÁNTICOS:" + RESET);
+                erroresSemanticos.forEach(error -> System.out.println(RED + "   " + error + RESET));
             }
 
             if (!warningsSemanticos.isEmpty()) {
-                System.out.println("\n? ADVERTENCIAS SEMÁNTICAS:");
-                warningsSemanticos.forEach(warning -> System.out.println("   " + warning));
+                System.out.println(YELLOW + "\n⚠ ADVERTENCIAS SEMÁNTICAS:" + RESET);
+                warningsSemanticos.forEach(warning -> System.out.println(YELLOW + "   " + warning + RESET));
             }
 
             if (erroresSemanticos.isEmpty() && warningsSemanticos.isEmpty()) {
-                System.out.println("? Análisis semántico completado sin errores.\n");
+                System.out.println(GREEN + "✓ Análisis semántico completado sin errores." + RESET + "\n");
             }
 
             // Mostrar resumen de errores
             if (!erroresSintacticos.isEmpty() || !erroresSemanticos.isEmpty()) {
-                System.out.println("=== RESUMEN DE ERRORES ===");
-                System.out.println("Errores sintácticos: " + erroresSintacticos.size());
-                System.out.println("Errores semánticos: " + erroresSemanticos.size());
-                System.out.println("Advertencias: " + warningsSemanticos.size());
+                System.out.println(RED + "=== RESUMEN DE ERRORES ===" + RESET);
+                System.out.println(RED + "Errores sintácticos: " + erroresSintacticos.size() + RESET);
+                System.out.println(RED + "Errores semánticos: " + erroresSemanticos.size() + RESET);
+                System.out.println(YELLOW + "Advertencias: " + warningsSemanticos.size() + RESET);
             }
 
             // === CÓDIGO INTERMEDIO ===
-            CodigoVisitor generador = new CodigoVisitor();
-            generador.visit(tree);
-            System.out.println("=== CÓDIGO INTERMEDIO ===");
-            generador.obtenerCodigo().forEach(System.out::println);
+            System.out.println("=== GENERACIÓN DE CÓDIGO INTERMEDIO ===");
+            CodigoVisitor visitor = new CodigoVisitor(listener.getTablaSimbolos());
+            visitor.visit(tree);
+            
+            // Imprimir el código generado
+            visitor.getGenerador().imprimirCodigo();
+            visitor.getGenerador().imprimirEstadisticas();
+            
             // Guardar el código intermedio en un archivo de texto
-            try (PrintWriter out = new PrintWriter(new FileWriter("codigo_intermedio.txt"))) {
-                generador.obtenerCodigo().forEach(out::println);
+            List<String> codigoIntermedio = visitor.getGenerador().getCodigo();
+            try (PrintWriter out = new PrintWriter(new FileWriter(archivoIntermedio))) {
+                codigoIntermedio.forEach(out::println);
+                System.out.println(GREEN + "\n✔ Código intermedio guardado en '" + archivoIntermedio + "'" + RESET);
             } catch (Exception e) {
                 System.err.println("Error al guardar el código intermedio: " + e.getMessage());
+            }
+
+            // === OPTIMIZACIÓN DE CÓDIGO ===
+            System.out.println("\n=== OPTIMIZACIÓN DE CÓDIGO ===");
+            Optimizador optimizador = new Optimizador(codigoIntermedio);
+            List<String> codigoOptimizado = optimizador.optimizar();
+
+            // Imprimir el código optimizado
+            System.out.println("\n📝 === CÓDIGO OPTIMIZADO ===");
+            for (int i = 0; i < codigoOptimizado.size(); i++) {
+                String instruccion = codigoOptimizado.get(i);
+                if (instruccion.endsWith(":")) {
+                    System.out.println("     " + instruccion);
+                } else {
+                    System.out.printf("%3d: %s\n", i, instruccion);
+                }
+            }
+             System.out.println("Total instrucciones optimizadas: " + codigoOptimizado.size());
+
+            // Guardar el código optimizado en un archivo de texto
+            try (PrintWriter out = new PrintWriter(new FileWriter(archivoOptimizado))) {
+                codigoOptimizado.forEach(out::println);
+                System.out.println(GREEN + "✔ Código optimizado guardado en '" + archivoOptimizado + "'" + RESET);
+            } catch (Exception e) {
+                System.err.println("Error al guardar el código optimizado: " + e.getMessage());
             }
 
         } catch (IOException e) {
@@ -159,50 +201,38 @@ public class App {
         // Obtener la tabla de símbolos global
         TablaSimbolos tabla = listener.getTablaSimbolos();
         Map<String, String> prototipos = listener.getPrototiposFunciones();
-        // Recorrer símbolos globales (funciones y variables globales)
-        for (TablaSimbolos.Simbolo simbolo : tabla.getSimbolos()) {
-            // Si es función, mostrar sus parámetros
-            if (simbolo.getTipo().equals("funcion")) {
-                // Extraer parámetros de la función desde el prototipo
-                String parametros = prototipos.get(simbolo.getNombre());
-                String paramsStr = "";
-                if (parametros != null && parametros.contains("(")) {
-                    paramsStr = parametros.substring(parametros.indexOf('(') + 1, parametros.indexOf(')'));
-                }
-                System.out.printf("%-15s %-10s %-15s %-10s %-10s %-15s %-20s\n",
-                    simbolo.getNombre(),
-                    simbolo.getValor(), // tipo de retorno
-                    "funcion",
-                    "-", "-", "global", "[" + paramsStr + "]");
-                // Buscar parámetros en el scope de la función
-                TablaSimbolos scopeFuncion = buscarScopeFuncion(tabla, simbolo.getNombre());
-                if (scopeFuncion != null) {
-                    for (TablaSimbolos.Simbolo param : scopeFuncion.getSimbolos()) {
-                        if (param.getValor().equals("parametro")) {
-                            System.out.printf("%-15s %-10s %-15s %-10s %-10s %-15s %-20s\n",
-                                param.getNombre(),
-                                param.getTipo(),
-                                "parametro",
-                                "-", "-", simbolo.getNombre(), "");
-                        }
-                    }
-                }
-            } else {
-                // Variable global
-                System.out.printf("%-15s %-10s %-15s %-10s %-10s %-15s %-20s\n",
-                    simbolo.getNombre(),
-                    simbolo.getTipo(),
-                    "variable",
-                    "-", "-", "global", "");
-            }
-        }
+        imprimirScopeRecursivo(tabla, prototipos, "global");
     }
 
-    // Busca el scope de una función por nombre
-    private static TablaSimbolos buscarScopeFuncion(TablaSimbolos tabla, String nombreFuncion) {
-        if (tabla == null) return null;
-        if (tabla.getNombreScope().equals("funcion:" + nombreFuncion)) return tabla;
-        if (tabla.getPadre() != null) return buscarScopeFuncion(tabla.getPadre(), nombreFuncion);
-        return null;
+    // Recorre recursivamente todos los scopes
+    private static void imprimirScopeRecursivo(TablaSimbolos tabla, Map<String, String> prototipos, String ambito) {
+        // Imprimir todas las variables y parámetros del scope actual
+        for (TablaSimbolos.Simbolo simbolo : tabla.getSimbolos()) {
+            String categoria = "variable";
+            String parametros = "";
+            
+            if (simbolo.getTipo().equals("parametro")) {
+                categoria = "parametro";
+            } else if (simbolo.getTipo().equals("funcion")) {
+                categoria = "funcion";
+                String nombreFuncion = simbolo.getNombre();
+                String prototipo = prototipos.get(nombreFuncion);
+                if (prototipo != null && prototipo.contains("(")) {
+                    parametros = prototipo.substring(prototipo.indexOf('(') + 1, prototipo.indexOf(')'));
+                }
+            }
+            
+            System.out.printf("%-15s %-10s %-15s %-10s %-10s %-15s %-20s\n",
+                simbolo.getNombre(),
+                simbolo.getTipo(),
+                categoria,
+                "-", "-", ambito, "[" + parametros + "]");
+        }
+        
+        // Recorrer hijos (scopes de funciones) y mostrar sus contenidos
+        for (TablaSimbolos hijo : tabla.getHijos()) {
+            String ambitoHijo = hijo.getNombreScope();
+            imprimirScopeRecursivo(hijo, prototipos, ambitoHijo);
+        }
     }
 }

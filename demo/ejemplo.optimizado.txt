@@ -1,0 +1,10 @@
+func_main:
+// Inicio de función: main
+x = 0
+// Fin de función: main
+return 0
+w = 10
+y = 20
+z = 30
+suma = 60
+resta = -60
