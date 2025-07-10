@@ -25,7 +25,7 @@ public class Optimizador {
      * @return El código intermedio optimizado.
      */
     public List<String> optimizar() {
-        System.out.println("🚀 INICIANDO FASE DE OPTIMIZACIÓN...");
+        System.out.println(" INICIANDO FASE DE OPTIMIZACIÓN...");
         
         // La optimización se ejecuta en un bucle hasta que no haya más cambios.
         boolean cambios;
@@ -34,7 +34,7 @@ public class Optimizador {
         do {
             iteracion++;
             System.out.println("\n   --- Iteración de Optimización #" + iteracion + " ---");
-            cambios = realizarPropagacionConstantes();
+            cambios = propagarConstantes();
             cambios |= eliminarCodigoMuerto();
             cambios |= simplificarExpresiones();
         } while (cambios && iteracion < maxIteraciones);
@@ -44,167 +44,92 @@ public class Optimizador {
     }
 
     /**
-     * Realiza la propagación de constantes y el plegado de constantes.
-     * Esta optimización reemplaza variables por sus valores constantes conocidos
-     * y evalúa expresiones constantes en tiempo de compilación.
+     * Propaga constantes mejorada: invalida cuando se reasigna y propaga en expresiones.
+     * @return true si hubo cambios, false si no.
      */
-    private boolean realizarPropagacionConstantes() {
-        System.out.println("   -> Aplicando Propagación y Plegado de Constantes (con scopes)...");
+    public boolean propagarConstantes() {
+        Map<String, String> constantValues = new HashMap<>();
+        List<String> codigoOptimizado = new ArrayList<>();
         boolean huboCambios = false;
-        
-        Map<String, String> constantesGlobales = new HashMap<>();
-        Map<String, String> constantesLocales = new HashMap<>();
-        boolean enFuncion = false;
 
-        List<String> codigoNuevo = new ArrayList<>();
-
-        for (String instruccionActual : this.codigo) {
-            String instruccionOriginal = instruccionActual;
-            String instruccionModificada = instruccionActual;
-
-            // Detección de límites de función
-            if (instruccionActual.startsWith("func_")) {
-                enFuncion = true;
-                constantesLocales.clear(); // Limpiar constantes locales al entrar en una nueva función
-            } else if (enFuncion && (instruccionActual.startsWith("return") || instruccionActual.startsWith("// Fin de función"))) {
-                 if(instruccionActual.contains("main")){ // Heurística simple para detectar fin de scope global
-                    enFuncion = false;
-                 }
+        for (String linea : codigo) {
+            if (linea.endsWith(":") || linea.startsWith("goto ") || linea.startsWith("if ") || linea.startsWith("call ")) {
+                codigoOptimizado.add(linea);
+                continue;
             }
-
-            // Propagar constantes: locales tienen prioridad sobre globales
-            Map<String, String> constantesActivas = new HashMap<>(constantesGlobales);
-            constantesActivas.putAll(constantesLocales);
-
-            for (Map.Entry<String, String> entry : constantesActivas.entrySet()) {
-                instruccionModificada = instruccionModificada.replaceAll("\\b" + entry.getKey() + "\\b", entry.getValue());
-            }
-
-            // Patrones
-            Pattern asignacion = Pattern.compile("^(\\w+)\\s*=\\s*(.*)$");
-            Matcher matcherAsignacion = asignacion.matcher(instruccionModificada);
-            
-            Pattern operacionBinaria = Pattern.compile("^(\\w+)\\s*=\\s*(\\S+)\\s*([+\\-*/%])\\s*(\\S+)$");
-            Matcher matcherOperacion = operacionBinaria.matcher(instruccionModificada);
-
-            if (matcherOperacion.matches()) {
-                String res = matcherOperacion.group(1);
-                String op1 = matcherOperacion.group(2);
-                String op = matcherOperacion.group(3);
-                String op2 = matcherOperacion.group(4);
-                
-                try {
-                    if (esNumero(op1) && esNumero(op2)) {
-                        // Plegado de constantes
-                        double val1 = Double.parseDouble(op1);
-                        double val2 = Double.parseDouble(op2);
-                        double resultado = 0;
-                        switch (op) {
-                            case "+": resultado = val1 + val2; break;
-                            case "-": resultado = val1 - val2; break;
-                            case "*": resultado = val1 * val2; break;
-                            case "/": if (val2 == 0) throw new ArithmeticException("División por cero"); resultado = val1 / val2; break;
-                            case "%": if (val2 == 0) throw new ArithmeticException("División por cero"); resultado = val1 % val2; break;
+            if (linea.contains(" = ")) {
+                String[] partes = linea.split(" = ", 2);
+                if (partes.length == 2) {
+                    String destino = partes[0].trim();
+                    String valor = partes[1].trim();
+                    String valorOriginal = valor;
+                    if (valor.matches("-?\\d+") || valor.matches("-?\\d+\\.\\d+") || (valor.startsWith("'") && valor.endsWith("'"))) {
+                        constantValues.put(destino, valor);
+                    } else {
+                        for (Map.Entry<String, String> entry : constantValues.entrySet()) {
+                            String regex = "\\b" + entry.getKey() + "\\b";
+                            valor = valor.replaceAll(regex, entry.getValue());
                         }
-                        String valorFinal = (resultado == (int) resultado) ? String.valueOf((int) resultado) : String.valueOf(resultado);
-                        instruccionModificada = res + " = " + valorFinal;
-                        
-                        // Almacenar en el mapa correcto
-                        if(enFuncion) constantesLocales.put(res, valorFinal);
-                        else constantesGlobales.put(res, valorFinal);
-
-                        System.out.println("      [*] Plegado: " + instruccionOriginal + " -> " + instruccionModificada);
-                    } else {
-                        if(enFuncion) constantesLocales.remove(res);
-                        else constantesGlobales.remove(res);
+                        if (valor.matches("-?\\d+") || valor.matches("-?\\d+\\.\\d+")) {
+                            constantValues.put(destino, valor);
+                        } else {
+                            constantValues.remove(destino);
+                        }
                     }
-                } catch (Exception e) {
-                    if(enFuncion) constantesLocales.remove(res);
-                    else constantesGlobales.remove(res);
-                }
-
-            } else if (matcherAsignacion.matches()) {
-                String var = matcherAsignacion.group(1);
-                String val = matcherAsignacion.group(2);
-
-                if (esConstante(val)) {
-                    if (enFuncion) {
-                        constantesLocales.put(var, val);
-                    } else {
-                        constantesGlobales.put(var, val);
-                    }
-                    System.out.println("      [+] Constante encontrada (" + (enFuncion ? "local" : "global") + "): " + var + " = " + val);
-                } else {
-                    if (enFuncion) constantesLocales.remove(var);
-                    else constantesGlobales.remove(var);
+                    String lineaOptimizada = destino + " = " + valor;
+                    if (!lineaOptimizada.equals(linea)) huboCambios = true;
+                    codigoOptimizado.add(lineaOptimizada);
+                    continue;
                 }
             }
-            
-            if (!instruccionModificada.equals(instruccionOriginal)) {
-                huboCambios = true;
+            String lineaOptimizada = linea;
+            for (Map.Entry<String, String> entry : constantValues.entrySet()) {
+                String regex = "\\b" + entry.getKey() + "\\b";
+                lineaOptimizada = lineaOptimizada.replaceAll(regex, entry.getValue());
             }
-            codigoNuevo.add(instruccionModificada);
+            if (!lineaOptimizada.equals(linea)) huboCambios = true;
+            codigoOptimizado.add(lineaOptimizada);
         }
-
-        boolean listasDiferentes = !this.codigo.equals(codigoNuevo);
-        this.codigo = codigoNuevo;
-        return listasDiferentes;
+        boolean cambioTamano = (codigoOptimizado.size() != codigo.size());
+        codigo = codigoOptimizado;
+        return huboCambios || cambioTamano;
     }
 
     /**
-     * Realiza la eliminación de código muerto, específicamente asignaciones
-     * a variables temporales que nunca se utilizan.
+     * Eliminación de código muerto mejorada: considera llamadas a funciones.
+     * @return true si hubo cambios, false si no.
      */
-    private boolean eliminarCodigoMuerto() {
-        System.out.println("   -> Aplicando Eliminación de Código Muerto...");
-        boolean huboCambios = false;
-        
-        // Paso 1: Encontrar todas las variables usadas
-        Set<String> variablesUsadas = new HashSet<>();
-        Pattern varPattern = Pattern.compile("\\b([a-zA-Z_]\\w*)\\b");
-
-        for (String instruccion : this.codigo) {
-            // Analizar el lado derecho de asignaciones
-            if (instruccion.contains("=")) {
-                String rhs = instruccion.substring(instruccion.indexOf('=') + 1);
-                Matcher matcher = varPattern.matcher(rhs);
-                while (matcher.find()) {
-                    variablesUsadas.add(matcher.group(1));
-                }
+    public boolean eliminarCodigoMuerto() {
+        Set<Integer> lineasAlcanzables = new HashSet<>();
+        Map<String, Integer> etiquetas = new HashMap<>();
+        for (int i = 0; i < codigo.size(); i++) {
+            String linea = codigo.get(i);
+            if (linea.endsWith(":")) {
+                String etiqueta = linea.substring(0, linea.length() - 1);
+                etiquetas.put(etiqueta, i);
             }
-            // Analizar otras instrucciones que usan variables
-            if (instruccion.startsWith("print") || instruccion.startsWith("return") || instruccion.startsWith("if")) {
-                 Matcher matcher = varPattern.matcher(instruccion);
-                 while (matcher.find()) {
-                    // Ignorar la palabra clave de la instrucción en sí
-                    if (!matcher.group(1).equals("print") && !matcher.group(1).equals("return") && !matcher.group(1).equals("if")) {
-                        variablesUsadas.add(matcher.group(1));
-                    }
+        }
+        marcarLineasAlcanzables(0, lineasAlcanzables, etiquetas);
+        if (etiquetas.containsKey("func_main")) {
+            marcarLineasAlcanzables(etiquetas.get("func_main"), lineasAlcanzables, etiquetas);
+        }
+        for (int i = 0; i < codigo.size(); i++) {
+            String linea = codigo.get(i);
+            if (linea.startsWith("call ")) {
+                String funcion = linea.substring(5).trim();
+                if (etiquetas.containsKey(funcion)) {
+                    marcarLineasAlcanzables(etiquetas.get(funcion), lineasAlcanzables, etiquetas);
                 }
             }
         }
-        System.out.println("      [i] Variables usadas: " + variablesUsadas);
-
-        // Paso 2: Eliminar asignaciones a variables temporales no usadas
-        List<String> codigoNuevo = new ArrayList<>();
-        Pattern asignacionTemp = Pattern.compile("^(t\\d+)\\s*=\\s*.*$");
-
-        for (String instruccion : this.codigo) {
-            Matcher matcher = asignacionTemp.matcher(instruccion);
-            if (matcher.matches()) {
-                String tempVar = matcher.group(1);
-                if (variablesUsadas.contains(tempVar)) {
-                    codigoNuevo.add(instruccion); // La variable se usa, se mantiene
-                } else {
-                    System.out.println("      [-] Código muerto eliminado: " + instruccion);
-                    huboCambios = true; // Se eliminó una instrucción
-                }
-            } else {
-                codigoNuevo.add(instruccion); // No es una asignación a temporal, se mantiene
+        List<String> codigoOptimizado = new ArrayList<>();
+        for (int i = 0; i < codigo.size(); i++) {
+            if (lineasAlcanzables.contains(i)) {
+                codigoOptimizado.add(codigo.get(i));
             }
         }
-
-        this.codigo = codigoNuevo;
+        boolean huboCambios = (codigoOptimizado.size() != codigo.size());
+        codigo = codigoOptimizado;
         return huboCambios;
     }
 
@@ -258,6 +183,37 @@ public class Optimizador {
         
         this.codigo = codigoNuevo;
         return huboCambios;
+    }
+
+    /**
+     * Marca recursivamente las líneas alcanzables desde una posición dada.
+     */
+    private void marcarLineasAlcanzables(int linea, Set<Integer> lineasAlcanzables, Map<String, Integer> etiquetas) {
+        if (linea < 0 || linea >= codigo.size() || lineasAlcanzables.contains(linea)) {
+            return;
+        }
+        lineasAlcanzables.add(linea);
+        String instruccion = codigo.get(linea);
+        if (instruccion.startsWith("goto ")) {
+            String etiqueta = instruccion.substring(5).trim();
+            if (etiquetas.containsKey(etiqueta)) {
+                marcarLineasAlcanzables(etiquetas.get(etiqueta), lineasAlcanzables, etiquetas);
+            }
+            return;
+        }
+        if (instruccion.startsWith("if ")) {
+            String[] partes = instruccion.split(" goto ");
+            if (partes.length == 2) {
+                String etiqueta = partes[1].trim();
+                if (etiquetas.containsKey(etiqueta)) {
+                    marcarLineasAlcanzables(etiquetas.get(etiqueta), lineasAlcanzables, etiquetas);
+                }
+            }
+        }
+        if (instruccion.equals("return") || instruccion.startsWith("return ")) {
+            return;
+        }
+        marcarLineasAlcanzables(linea + 1, lineasAlcanzables, etiquetas);
     }
 
     private boolean esNumero(String str) {
