@@ -16,6 +16,7 @@ public class CodigoVisitor extends MiniLenguajeBaseVisitor<String> {
     private TablaSimbolos tabla;
     private int nivelAnidamiento;
     private String funcionActual;
+    private List<String> errores = new ArrayList<>();
     
     public CodigoVisitor(TablaSimbolos tabla) {
         this.generador = new GeneradorCodigo();
@@ -157,23 +158,44 @@ public class CodigoVisitor extends MiniLenguajeBaseVisitor<String> {
     @Override
     public String visitSentenciaAsignacion(MiniLenguajeParser.SentenciaAsignacionContext ctx) {
         if (ctx == null) return null;
-        
-        String nombre = ctx.ID().getText();
-        System.out.println("🎯 VISITOR: Encontré asignación -> " + nombre + " = ... en función: " + funcionActual);
-        
-        // Procesar la expresión del lado derecho
-        System.out.println("🎯 VISITOR: Evaluando expresión del lado derecho...");
-        String valor = visit(ctx.expresion());
-        
-        if (valor != null) {
-            // Generar la asignación
-            System.out.println("🎯 VISITOR: Generando asignación final...");
-            generador.genAsignacion(nombre, valor);
-        } else {
-            generador.agregarInstruccion("// Error: expresión inválida en asignación a " + nombre);
-            generador.genAsignacion(nombre, "0");
+        try {
+            // Asignación a variable o a arreglo
+            if (ctx.PRA() != null) {
+                // Asignación a una posición de array: ID PRA expresion PRC ASIGNACION expresion PYC
+                if (ctx.ID() == null) {
+                    errores.add("Error: identificador nulo en asignación de arreglo");
+                    generador.agregarInstruccion("// Error: identificador nulo en asignación de arreglo");
+                    return null;
+                }
+                String nombre = ctx.ID().getText();
+                String indice = visit(ctx.expresion(0));
+                String valor = visit(ctx.expresion(1));
+                if (nombre == null || indice == null || valor == null) {
+                    errores.add("Error: asignación de arreglo con valores nulos (nombre, índice o valor)");
+                    generador.agregarInstruccion("// Error: asignación de arreglo con valores nulos");
+                    return null;
+                }
+                generador.agregarInstruccion(nombre + "[" + indice + "] = " + valor);
+            } else {
+                // Asignación a variable simple: ID ASIGNACION expresion PYC
+                if (ctx.ID() == null) {
+                    errores.add("Error: identificador nulo en asignación simple");
+                    generador.agregarInstruccion("// Error: identificador nulo en asignación simple");
+                    return null;
+                }
+                String nombre = ctx.ID().getText();
+                String valor = visit(ctx.expresion(0));
+                if (nombre == null || valor == null) {
+                    errores.add("Error: asignación simple con valores nulos (nombre o valor)");
+                    generador.agregarInstruccion("// Error: asignación simple con valores nulos");
+                    return null;
+                }
+                generador.genAsignacion(nombre, valor);
+            }
+        } catch (Exception e) {
+            errores.add("Excepción en visitSentenciaAsignacion: " + e.getMessage());
+            generador.agregarInstruccion("// Excepción en asignación: " + e.getMessage());
         }
-        
         return null;
     }
     
@@ -652,5 +674,9 @@ public class CodigoVisitor extends MiniLenguajeBaseVisitor<String> {
             default:
                 return "0";
         }
+    }
+
+    public List<String> getErrores() {
+        return errores;
     }
 } 

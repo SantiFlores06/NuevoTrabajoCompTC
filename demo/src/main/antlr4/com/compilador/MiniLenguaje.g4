@@ -11,11 +11,12 @@ declaracion : declaracionVariable
 
 importacion : IMPORT STRING PYC ;
 
-declaracionVariable : tipo ID (ASIGNACION expresion)? PYC ;
+// Soporte para declaración de arreglos
+declaracionVariable : tipo ID (PRA INTEGER PRC)? (ASIGNACION expresion)? PYC ;
 
 declaracionConstante : CONST tipo ID ASIGNACION expresion PYC ;
 
-declaracionFuncion : tipo ID PA parametros? PC LA sentencia* LC ;
+declaracionFuncion : tipo ID PA parametros? PC LA (declaracionVariable | sentencia)* LC ;
 
 parametros : parametro (COMA parametro)* ;
 
@@ -42,7 +43,8 @@ sentencia : sentenciaAsignacion
          | bloque 
          ;
 
-sentenciaAsignacion : ID ASIGNACION expresion PYC ;
+// Soporte para asignación a arreglos
+sentenciaAsignacion : (ID | ID PRA expresion PRC) ASIGNACION expresion PYC ;
 
 sentenciaIf : IF PA expresion PC sentencia (ELSE sentencia)? ;
 
@@ -71,7 +73,7 @@ expresionAritmetica : termino ((MAS | MENOS) termino)* ;
 termino : factor ((MULTIPLICACION | DIVISION | MODULO) factor)* ;
 
 factor : PA expresion PC
-       | ID
+       | ID (PRA expresion PRC)?
        | INTEGER
        | FLOAT
        | DOUBLE
@@ -87,7 +89,7 @@ llamadaFuncion : ID PA argumentos? PC ;
 argumentos : expresion (COMA expresion)* ;
 
 //  Tipos de datos
-tipo : INT | FLOAT_TYPE | DOUBLE_TYPE | STRING_TYPE | CHAR_TYPE | BOOLEAN_TYPE | VOID ;
+tipo : INT | FLOAT_TYPE | DOUBLE_TYPE | STRING_TYPE | CHAR_TYPE | BOOLEAN_TYPE | BOOL_TYPE | VOID ;
 
 //  Reglas léxicas (ORDEN IMPORTANTE: específicos antes que generales)
 
@@ -100,6 +102,7 @@ DOUBLE_TYPE : 'double' ;
 STRING_TYPE : 'string' ;
 CHAR_TYPE   : 'char' ;
 BOOLEAN_TYPE: 'boolean' ;
+BOOL_TYPE: 'bool' ;
 VOID        : 'void' ;
 IF          : 'if' ;
 ELSE        : 'else' ;

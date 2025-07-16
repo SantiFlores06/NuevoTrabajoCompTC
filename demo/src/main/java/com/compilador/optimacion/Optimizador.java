@@ -38,7 +38,7 @@ public class Optimizador {
             cambios |= eliminarCodigoMuerto();
             cambios |= simplificarExpresiones();
         } while (cambios && iteracion < maxIteraciones);
-        
+        eliminarComentarios();
         System.out.println("✅ FASE DE OPTIMIZACIÓN COMPLETADA en " + iteracion + " iteraciones.");
         return this.codigo;
     }
@@ -96,32 +96,49 @@ public class Optimizador {
     }
 
     /**
-     * Eliminación de código muerto mejorada: considera llamadas a funciones.
+     * Eliminación de código muerto: elimina solo líneas inalcanzables dentro de funciones,
+     * pero mantiene todas las funciones y su contenido aunque no sean llamadas.
      * @return true si hubo cambios, false si no.
      */
     public boolean eliminarCodigoMuerto() {
         Set<Integer> lineasAlcanzables = new HashSet<>();
         Map<String, Integer> etiquetas = new HashMap<>();
+        // Identificar todas las etiquetas de función
         for (int i = 0; i < codigo.size(); i++) {
             String linea = codigo.get(i);
-            if (linea.endsWith(":")) {
-                String etiqueta = linea.substring(0, linea.length() - 1);
-                etiquetas.put(etiqueta, i);
+            if (linea.matches("func_\\w+:")) {
+                etiquetas.put(linea.substring(0, linea.length() - 1), i);
             }
         }
-        marcarLineasAlcanzables(0, lineasAlcanzables, etiquetas);
-        if (etiquetas.containsKey("func_main")) {
-            marcarLineasAlcanzables(etiquetas.get("func_main"), lineasAlcanzables, etiquetas);
-        }
-        for (int i = 0; i < codigo.size(); i++) {
-            String linea = codigo.get(i);
-            if (linea.startsWith("call ")) {
-                String funcion = linea.substring(5).trim();
-                if (etiquetas.containsKey(funcion)) {
-                    marcarLineasAlcanzables(etiquetas.get(funcion), lineasAlcanzables, etiquetas);
+        // Para cada función, marcar alcanzables desde su inicio hasta el final de la función
+        for (Map.Entry<String, Integer> entry : etiquetas.entrySet()) {
+            int inicio = entry.getValue();
+            int fin = codigo.size();
+            // Buscar el inicio de la siguiente función para delimitar el final
+            for (int j = inicio + 1; j < codigo.size(); j++) {
+                String linea = codigo.get(j);
+                if (linea.matches("func_\\w+:")) {
+                    fin = j;
+                    break;
                 }
             }
+            // Marcar todas las líneas de la función como alcanzables
+            for (int k = inicio; k < fin; k++) {
+                lineasAlcanzables.add(k);
+            }
         }
+        // También marcar alcanzables las líneas fuera de funciones (por ejemplo, código global)
+        int primerFunc = codigo.size();
+        for (int i = 0; i < codigo.size(); i++) {
+            if (codigo.get(i).matches("func_\\w+:")) {
+                primerFunc = i;
+                break;
+            }
+        }
+        for (int i = 0; i < primerFunc; i++) {
+            lineasAlcanzables.add(i);
+        }
+        // Eliminar solo líneas realmente inalcanzables (por ejemplo, después de return/goto dentro de una función)
         List<String> codigoOptimizado = new ArrayList<>();
         for (int i = 0; i < codigo.size(); i++) {
             if (lineasAlcanzables.contains(i)) {
@@ -214,6 +231,19 @@ public class Optimizador {
             return;
         }
         marcarLineasAlcanzables(linea + 1, lineasAlcanzables, etiquetas);
+    }
+
+    /**
+     * Elimina los comentarios (líneas que comienzan con //) del código optimizado.
+     */
+    private void eliminarComentarios() {
+        List<String> codigoSinComentarios = new ArrayList<>();
+        for (String linea : codigo) {
+            if (!linea.trim().startsWith("//")) {
+                codigoSinComentarios.add(linea);
+            }
+        }
+        codigo = codigoSinComentarios;
     }
 
     private boolean esNumero(String str) {

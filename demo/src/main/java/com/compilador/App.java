@@ -122,6 +122,9 @@ public class App {
             List<String> erroresSemanticos = listener.getErroresCriticos();
             List<String> warningsSemanticos = listener.getAdvertencias();
 
+            boolean hayErrores = !erroresSintacticos.isEmpty() || !erroresSemanticos.isEmpty();
+            boolean hayAdvertencias = !warningsSemanticos.isEmpty();
+
             if (!erroresSemanticos.isEmpty()) {
                 System.out.println(RED + "\n✗ ERRORES SEMÁNTICOS:" + RESET);
                 erroresSemanticos.forEach(error -> System.out.println(RED + "   " + error + RESET));
@@ -132,23 +135,31 @@ public class App {
                 warningsSemanticos.forEach(warning -> System.out.println(YELLOW + "   " + warning + RESET));
             }
 
-            if (erroresSemanticos.isEmpty() && warningsSemanticos.isEmpty()) {
-                System.out.println(GREEN + "✓ Análisis semántico completado sin errores." + RESET + "\n");
-            }
-
-            // Mostrar resumen de errores
-            if (!erroresSintacticos.isEmpty() || !erroresSemanticos.isEmpty()) {
-                System.out.println(RED + "=== RESUMEN DE ERRORES ===" + RESET);
+            // Mostrar resumen de errores y advertencias SIEMPRE si existen
+            if (hayErrores || hayAdvertencias) {
+                System.out.println(RED + "=== RESUMEN DE ERRORES Y ADVERTENCIAS ===" + RESET);
                 System.out.println(RED + "Errores sintácticos: " + erroresSintacticos.size() + RESET);
                 System.out.println(RED + "Errores semánticos: " + erroresSemanticos.size() + RESET);
                 System.out.println(YELLOW + "Advertencias: " + warningsSemanticos.size() + RESET);
+            }
+
+            // Solo mostrar mensaje de éxito si NO hay errores NI advertencias
+            if (!hayErrores && !hayAdvertencias) {
+                System.out.println(GREEN + "✓ Análisis semántico completado sin errores." + RESET + "\n");
             }
 
             // === CÓDIGO INTERMEDIO ===
             System.out.println("=== GENERACIÓN DE CÓDIGO INTERMEDIO ===");
             CodigoVisitor visitor = new CodigoVisitor(listener.getTablaSimbolos());
             visitor.visit(tree);
-            
+
+            // Mostrar errores del visitor de código intermedio si existen
+            List<String> erroresVisitor = visitor.getErrores();
+            if (!erroresVisitor.isEmpty()) {
+                System.out.println(RED + "\n✗ ERRORES EN GENERACIÓN DE CÓDIGO INTERMEDIO:" + RESET);
+                erroresVisitor.forEach(error -> System.out.println(RED + "   " + error + RESET));
+            }
+
             // Imprimir el código generado
             visitor.getGenerador().imprimirCodigo();
             visitor.getGenerador().imprimirEstadisticas();

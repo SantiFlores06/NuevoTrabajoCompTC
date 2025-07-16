@@ -166,7 +166,7 @@ public class SimbolosListener extends MiniLenguajeBaseListener {
 
     @Override
     public void enterSentenciaAsignacion(MiniLenguajeParser.SentenciaAsignacionContext ctx) {
-        if (ctx == null || ctx.ID() == null || ctx.expresion() == null) {
+        if (ctx == null || ctx.ID() == null || ctx.expresion().isEmpty()) {
             advertencias.add("Advertencia: No se pudo analizar una asignación por errores de sintaxis.");
             return;
         }
@@ -183,7 +183,7 @@ public class SimbolosListener extends MiniLenguajeBaseListener {
         }
         
         String tipoVariable = tiposVariables.get(nombre);
-        String tipoAsignacion = inferirTipo(ctx.expresion());
+        String tipoAsignacion = inferirTipo(ctx.expresion(0));
         
         if (tipoVariable != null && !tiposCompatibles(tipoVariable, tipoAsignacion)) {
             erroresCriticos.add("Error critico: Asignacion de tipo incorrecto para '" + nombre + 
@@ -192,8 +192,8 @@ public class SimbolosListener extends MiniLenguajeBaseListener {
         
         variablesUsadas.put(nombre, true);
         variablesInicializadas.put(nombre, true);
-        scopeActual.actualizar(nombre, ctx.expresion().getText());
-        System.out.println("Asignacion: " + nombre + " = " + ctx.expresion().getText());
+        scopeActual.actualizar(nombre, ctx.expresion(0).getText());
+        System.out.println("Asignacion: " + nombre + " = " + ctx.expresion(0).getText());
     }
 
     @Override

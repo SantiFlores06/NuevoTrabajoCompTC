@@ -1,0 +1,47 @@
+contadorGlobal = 0
+valorPi = 0
+inicial = '\0'
+activo = 0
+func_sumar:
+// Inicio de función: sumar
+param int a
+param int b
+t0 = a + b
+resultado = t0
+t1 = contadorGlobal + 1
+contadorGlobal = t1
+return resultado
+// Fin de función: sumar
+return 0
+func_main:
+// Inicio de función: main
+contadorGlobal = 0
+valorPi = 3.14
+inicial = 'M'
+numeros[0] = 10
+numeros[1] = 20
+numeros[2] = 30
+t2 = numeros + numeros
+temp = t2
+t3 = temp * 2
+temp = t3
+t4 = temp / 3
+temp = t4
+t5 = temp % 5
+temp = t5
+t6 = call sumar(temp, 5)
+estado = t6
+contadorGlobal = estado
+valorPi = temp
+inicial = 'X'
+t7 = estado > 0
+if !t7 goto L0
+// Error: identificador nulo en asignación simple
+// Excepción en asignación: Cannot invoke "org.antlr.v4.runtime.tree.ParseTree.accept(org.antlr.v4.runtime.tree.ParseTreeVisitor)" because "tree" is null
+t8 = estado + 10
+auxiliar = t8
+estado = auxiliar
+L0:
+return estado
+// Fin de función: main
+return 0

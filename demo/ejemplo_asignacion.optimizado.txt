@@ -1,7 +1,0 @@
-x = 0
-func_main:
-// Inicio de función: main
-0 = 5
-print 5
-// Fin de función: main
-return 5
