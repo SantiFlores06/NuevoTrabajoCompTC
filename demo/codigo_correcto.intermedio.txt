@@ -16,7 +16,7 @@ return 0
 func_main:
 // Inicio de función: main
 contadorGlobal = 0
-valorPi = 3.14
+valorPi = 314
 inicial = 'M'
 numeros[0] = 10
 numeros[1] = 20
@@ -32,14 +32,14 @@ temp = t5
 t6 = call sumar(temp, 5)
 estado = t6
 contadorGlobal = estado
-valorPi = temp
+valorPi = 30
 inicial = 'X'
 t7 = estado > 0
-if !t7 goto L0
-// Error: identificador nulo en asignación simple
-// Excepción en asignación: Cannot invoke "org.antlr.v4.runtime.tree.ParseTree.accept(org.antlr.v4.runtime.tree.ParseTreeVisitor)" because "tree" is null
-t8 = estado + 10
-auxiliar = t8
+t8 = t7 == true
+if !t8 goto L0
+auxiliar = 0
+t9 = estado + 10
+auxiliar = t9
 estado = auxiliar
 L0:
 return estado

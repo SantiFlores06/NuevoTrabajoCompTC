@@ -23,16 +23,18 @@ public class TablaSimbolos {
         this.nombreScope = nombreScope;
     }
 
-    public void insertar(String nombre, String tipo, String valor, String categoria) {
+    public void insertar(String nombre, String tipo, String valor, String categoria, int linea, int columna) {
         if (simbolos.containsKey(nombre)) {
             throw new RuntimeException("Variable '" + nombre + "' ya declarada en el scope " + nombreScope);
         }
-        simbolos.put(nombre, new Simbolo(nombre, tipo, valor, categoria));
+        simbolos.put(nombre, new Simbolo(nombre, tipo, valor, categoria, linea, columna));
     }
-
     // Método sobrecargado para mantener compatibilidad
+    public void insertar(String nombre, String tipo, String valor, String categoria) {
+        insertar(nombre, tipo, valor, categoria, -1, -1);
+    }
     public void insertar(String nombre, String tipo, String valor) {
-        insertar(nombre, tipo, valor, "variable");
+        insertar(nombre, tipo, valor, "variable", -1, -1);
     }
 
     public Simbolo buscar(String nombre) {
@@ -103,18 +105,26 @@ public class TablaSimbolos {
         private String tipo;
         private String valor;
         private String categoria;
+        private int linea;
+        private int columna;
 
-        public Simbolo(String nombre, String tipo, String valor, String categoria) {
+        public Simbolo(String nombre, String tipo, String valor, String categoria, int linea, int columna) {
             this.nombre = nombre;
             this.tipo = tipo;
             this.valor = valor;
             this.categoria = categoria;
+            this.linea = linea;
+            this.columna = columna;
         }
-
+        public Simbolo(String nombre, String tipo, String valor, String categoria) {
+            this(nombre, tipo, valor, categoria, -1, -1);
+        }
         public String getNombre() { return nombre; }
         public String getTipo() { return tipo; }
         public String getValor() { return valor; }
         public String getCategoria() { return categoria; }
         public void setValor(String valor) { this.valor = valor; }
+        public int getLinea() { return linea; }
+        public int getColumna() { return columna; }
     }
 } 

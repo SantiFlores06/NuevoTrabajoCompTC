@@ -32,7 +32,8 @@ sentenciaGlobal : sentenciaPrint
                 ;
 
 // Sentencias que solo pueden estar dentro de funciones
-sentencia : sentenciaAsignacion
+sentencia : declaracionVariable
+         | sentenciaAsignacion
          | sentenciaIf
          | sentenciaFor
          | sentenciaWhile

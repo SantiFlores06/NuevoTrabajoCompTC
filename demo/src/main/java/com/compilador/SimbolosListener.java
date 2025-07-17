@@ -72,7 +72,9 @@ public class SimbolosListener extends MiniLenguajeBaseListener {
         }
         
         String valor = ctx.expresion() != null ? ctx.expresion().getText() : "undefined";
-        scopeActual.insertar(nombre, tipoDeclarado, valor, "variable");
+        int linea = ctx.getStart().getLine();
+        int columna = ctx.getStart().getCharPositionInLine();
+        scopeActual.insertar(nombre, tipoDeclarado, valor, "variable", linea, columna);
         
         String ambito = enFuncion ? "funcion:" + funcionActual : "global";
         System.out.println("Variable declarada: " + nombre + " (" + tipoDeclarado + ") en " + ambito);
@@ -120,7 +122,9 @@ public class SimbolosListener extends MiniLenguajeBaseListener {
         prototiposFunciones.put(nombre, prototipo.toString());
         
         // Insertar la función en el scope global
-        scopeActual.insertar(nombre, tipoRetorno, "funcion", "funcion");
+        int linea = ctx.getStart().getLine();
+        int columna = ctx.getStart().getCharPositionInLine();
+        scopeActual.insertar(nombre, tipoRetorno, "funcion", "funcion", linea, columna);
         
         // Crear scope hijo para la función
         TablaSimbolos scopeFuncion = new TablaSimbolos(scopeActual, "funcion:" + nombre);
@@ -356,34 +360,34 @@ public class SimbolosListener extends MiniLenguajeBaseListener {
     public void exitPrograma(MiniLenguajeParser.ProgramaContext ctx) {
         for (Map.Entry<String, Boolean> entry : variablesUsadas.entrySet()) {
             if (!entry.getValue()) {
-                advertencias.add("Advertencia: Variable '" + entry.getKey() + "' declarada pero no usada");
+                advertencias.add("⚠️ Warning: Variable '" + entry.getKey() + "' declarada pero nunca utilizada en el ámbito '" + (enFuncion ? funcionActual : "global") + "'");
             }
         }
         
         for (Map.Entry<String, Boolean> entry : funcionesUsadas.entrySet()) {
             if (!entry.getValue()) {
-                advertencias.add("Advertencia: Funcion '" + entry.getKey() + "' definida pero no usada");
+                advertencias.add("⚠️ Warning: Funcion '" + entry.getKey() + "' definida pero no usada en el ámbito '" + (enFuncion ? funcionActual : "global") + "'");
             }
         }
         
         for (Map.Entry<String, Boolean> entry : libreriasUsadas.entrySet()) {
             if (!entry.getValue()) {
-                advertencias.add("Advertencia: Libreria " + entry.getKey() + " importada pero no usada");
+                advertencias.add("⚠️ Warning: Libreria " + entry.getKey() + " importada pero no usada en el ámbito '" + (enFuncion ? funcionActual : "global") + "'");
             }
         }
         
         for (Map.Entry<String, Boolean> entry : variablesInicializadas.entrySet()) {
             if (!entry.getValue()) {
-                advertencias.add("Advertencia: Variable '" + entry.getKey() + "' declarada pero no inicializada");
+                advertencias.add("⚠️ Warning: Variable '" + entry.getKey() + "' declarada pero no inicializada en el ámbito '" + (enFuncion ? funcionActual : "global") + "'");
             }
         }
         
         for (String param : parametrosNoUsados) {
-            advertencias.add("Advertencia: Parametro '" + param + "' no usado en funcion '" + funcionActual + "'");
+            advertencias.add("⚠️ Warning: Parametro '" + param + "' no usado en funcion '" + funcionActual + "' en el ámbito '" + (enFuncion ? funcionActual : "global") + "'");
         }
         
         if (enBucle && !tieneBreakContinue) {
-            advertencias.add("Advertencia: Bucle potencialmente infinito detectado");
+            advertencias.add("⚠️ Warning: Bucle potencialmente infinito detectado en el ámbito '" + (enFuncion ? funcionActual : "global") + "'");
         }
     }
 
@@ -456,7 +460,7 @@ public class SimbolosListener extends MiniLenguajeBaseListener {
             if (factor.ID() != null) {
                 String nombre = factor.ID().getText();
                 if (!scopeActual.existe(nombre)) {
-                    erroresCriticos.add("Error critico: Variable '" + nombre + "' no declarada en linea " + factor.getStart().getLine());
+                    erroresCriticos.add("❌ Error: Variable '" + nombre + "' no declarada en el ámbito '" + (enFuncion ? funcionActual : "global") + "' (línea " + factor.getStart().getLine() + ", columna " + factor.getStart().getCharPositionInLine() + ")");
                 } else {
                     variablesUsadas.put(nombre, true);
                     if (parametrosNoUsados.contains(nombre)) {

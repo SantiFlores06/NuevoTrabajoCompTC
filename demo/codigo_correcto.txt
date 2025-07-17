@@ -23,7 +23,7 @@ int main() {
     
     // Inicializar variables globales
     contadorGlobal = 0;
-    valorPi = 3.14;
+    valorPi = 314d;
     inicial = 'M';
     
     // Usar arrays
@@ -42,11 +42,11 @@ int main() {
     
     // Usar variables globales
     contadorGlobal = estado;
-    valorPi = temp;
+    valorPi = 30;
     inicial = 'X';
     
     // Estructuras de control básicas
-    if (estado > 0) {
+    if ((estado > 0) == true) {
         int auxiliar;
         auxiliar = estado + 10;
         estado = auxiliar;

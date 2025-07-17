@@ -206,8 +206,9 @@ public class App {
     // Imprime la tabla de símbolos con el formato solicitado
     private static void imprimirTablaSimbolos(SimbolosListener listener) {
         // Encabezado
-        System.out.printf("%-15s %-10s %-15s %-10s %-10s %-15s %-20s\n", 
-            "NOMBRE", "TIPO", "CATEGORÍA", "LÍNEA", "COLUMNA", "ÁMBITO", "PARÁMETROS");
+        System.out.println("=== TABLA DE SÍMBOLOS ===");
+        System.out.printf("%-15s %-10s %-15s %-10s %-10s %-15s %-20s\n",
+            "NOMBRE", "TIPO", "CATEGORÍA", "LÍNEA", "COLUMNA", "ÁMBITO", "DETALLES");
         System.out.println("--------------------------------------------------------------------------------------------");
         // Obtener la tabla de símbolos global
         TablaSimbolos tabla = listener.getTablaSimbolos();
@@ -217,27 +218,27 @@ public class App {
 
     // Recorre recursivamente todos los scopes
     private static void imprimirScopeRecursivo(TablaSimbolos tabla, Map<String, String> prototipos, String ambito) {
-        // Imprimir todas las variables y parámetros del scope actual
         for (TablaSimbolos.Simbolo simbolo : tabla.getSimbolos()) {
             String categoria = simbolo.getCategoria();
+            String detalles = "[private]";
             String parametros = "";
-            
             if ("funcion".equals(categoria)) {
                 String nombreFuncion = simbolo.getNombre();
                 String prototipo = prototipos.get(nombreFuncion);
                 if (prototipo != null && prototipo.contains("(")) {
                     parametros = prototipo.substring(prototipo.indexOf('(') + 1, prototipo.indexOf(')'));
                 }
+                detalles += parametros.isEmpty() ? " []" : " [" + parametros + "]";
             }
-            
-            System.out.printf("%-15s %-10s %-15s %-10s %-10s %-15s %-20s\n",
+            System.out.printf("%-15s %-10s %-15s %-10d %-10d %-15s %-20s\n",
                 simbolo.getNombre(),
                 simbolo.getTipo(),
                 categoria,
-                "-", "-", ambito, "[" + parametros + "]");
+                simbolo.getLinea(),
+                simbolo.getColumna(),
+                ambito,
+                detalles);
         }
-        
-        // Recorrer hijos (scopes de funciones) y mostrar sus contenidos
         for (TablaSimbolos hijo : tabla.getHijos()) {
             String ambitoHijo = hijo.getNombreScope();
             imprimirScopeRecursivo(hijo, prototipos, ambitoHijo);
